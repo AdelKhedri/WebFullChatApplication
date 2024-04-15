@@ -1,5 +1,5 @@
 media/images/profiles/*.*
-*/__pycache__
+*/__pycache__/*.*
 */migrations/*_initial.py
 db.sqlite3
 schema.txt
