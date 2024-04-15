@@ -38,7 +38,12 @@ class SinUpView(View):
     def post(self, request, *args, **kwargs):
         userForm = UserCreateForm(request.POST)
         if userForm.is_valid():
-            userForm.save()
+            user = userForm.save()
+            user.set_password(userForm.cleaned_data['password'])
+            user.save()
+            login(request, user)
+            Profile.objects.create(user=user)
+            return redirect('user:profile')
         return render(request, self.template_name, {'form': userForm})
     
 
@@ -46,11 +51,6 @@ class ChangeProfileView(LoginRequiredMixin, View):
     template_name = 'user/edite_profile.html'
     login_url = '/login/'
 
-    # def setup(self, request, *args, **kwargs):
-    #     if request.user.is_authenticated:
-    #         self.
-    #     super().setup(request, *args, **kwargs)
-    
     def get(self, request, *args, **kwargs):
         context = {
             'profile_form': ProfileChangeForm(instance=request.user.profile),
