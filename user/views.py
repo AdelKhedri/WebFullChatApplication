@@ -59,7 +59,7 @@ class ChangeProfileView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        profile_form = ProfileChangeForm(request.FILES, request.POST, instance=request.user.profile)
+        profile_form = ProfileChangeForm(request.FILES,request.POST, instance=request.user.profile)
         user_form = UserChangeForm(request.POST, instance=request.user)
 
         if profile_form.is_valid():
