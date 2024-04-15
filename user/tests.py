@@ -1,21 +1,31 @@
 from django.test import TestCase
-from .models import User, Profile
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.webdriver import WebDriver
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from .models import User
+from time import sleep
 
-class UserModelTest(TestCase):
-    def setUp(self):
-        user = User.objects.create(username='user', phone_number=9929941452)
+
+class SeleniumTest(StaticLiveServerTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.selenium = WebDriver()
+        cls.selenium.implicitly_wait(10)
+        user = User.objects.create(phone_number=9123456789, username='sahar')
+        user.set_password('sahar1234')
     
-    def test_exist_user(self):
-        user = User.objects.get(username='user', phone_number=9929941452)
-        self.assertEqual(user.username, 'user')
-        self.assertEqual(user.phone_number, 9929941452)
-
-
-class ProfileModelTest(TestCase):
-    def setUp(self):
-        user = User.objects.create(username='user', phone_number=9929941452)
-        profile = Profile.objects.create(user=user, image='./images.jpg')
+    @classmethod
+    def tearDownClass(cls):
+        # cls.selenium.quit()
+        super().tearDownClass()
     
-    def test_user_have_image(self):
-        user = User.objects.get(username='user').profile
-        self.assertTrue(user.has_image())
+    @classmethod
+    def test_browser_login(self):
+        self.selenium.get(f'{self.live_server_url}/login/')
+        phone_number_input = self.selenium.find_element(By.NAME, 'phone_number')
+        phone_number_input.send_keys(9123456789)
+        password_input = self.selenium.find_element(By.NAME, 'password')
+        password_input.send_keys('sahar1234')
+        # button_sum = self.selenium.find_element(By.XPATH, '//button[text="ورود"]').click()

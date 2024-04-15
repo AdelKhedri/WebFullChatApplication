@@ -14,6 +14,10 @@ def password_validator(value):
     elif value.isnumeric() or value.isalpha():
         raise ValidationError(_('پسورد نباید عدد یا متن باشد.باید ترکیبی از انها باشد'))
     
-def user_validator(value):
+def phone_validator(value):
+    if User.objects.filter(phone_number=value).exists():
+        raise ValidationError(_('کاربر با این شماره رجود داره'))
+
+def username_validator(value):
     if User.objects.filter(phone_number=value).exists():
         raise ValidationError(_('کاربر با این شماره رجود داره'))

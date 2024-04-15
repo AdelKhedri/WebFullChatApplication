@@ -8,7 +8,7 @@ def_atter = { 'class': 'form-control background text-white' }
 
 
 class UserLoginForm(forms.Form):
-    phone_number = forms.IntegerField(help_text='09123456789', widget=forms.NumberInput(attrs=def_atter), validators=[validators.phone_number_exist, ])
+    phone_number = forms.IntegerField(help_text='9123456789', widget=forms.NumberInput(attrs=def_atter), validators=[validators.phone_number_exist, ])
     password = forms.CharField(help_text="*******", widget=forms.PasswordInput(attrs=def_atter), validators=[validators.password_validator])
 
 
