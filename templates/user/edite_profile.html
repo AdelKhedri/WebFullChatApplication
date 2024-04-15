@@ -1,0 +1,81 @@
+{% extends "user/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col chat">
+            <div class="card" style="height: 100vh;">
+                <div id="chat-profile">
+                    <div class="card" style="height: auto;">
+                        <div class="card-title">
+                            <button class="btn btn-primary" onclick="OpenProfile()"><svg
+                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30">
+                                    <path
+                                        d="M10.78 19.03a.75.75 0 0 1-1.06 0l-6.25-6.25a.75.75 0 0 1 0-1.06l6.25-6.25a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L5.81 11.5h14.44a.75.75 0 0 1 0 1.5H5.81l4.97 4.97a.75.75 0 0 1 0 1.06Z">
+                                    </path>
+                                </svg></button>
+                        </div>
+                    </div>
+                    <div class="row2 justify-content-center">
+                        <img src="{{request.user.profile.image.url}}" class="rounded-circle"
+                            style="max-width: 300px;max-height: 300px;" alt="">
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="row">
+                            <div class="col">
+                                <form action="" enctype="multipart/form-data" method="post">
+                                    <div class="card p-4 text-white" style="height: auto;">
+                                        <p>کابر</p>
+                                        <p class="text-mouted">
+                                            یوزرنیم: {{user_form.username}}
+                                        </p>
+                                        <p class="text-mouted">
+                                            نام: {{user_form.first_name}}
+                                        </p>
+                                        <p class="text-mouted">
+                                            نام خانوادگی: {{user_form.last_name}}
+                                        </p>
+                                        <p class="text-mouted">
+                                            ایمیل: {{user_form.email}}
+                                        </p>
+                                        <p class="text-mouted">
+                                            شماره: {{user_form.phone_number}}
+                                        </p>
+                                        <h5>پروفایل</h5>
+                                        <p class="text-mouted">
+                                            عکس پروفایل: {{profile_form.image}}
+                                        </p>
+                                        <p class="text-mouted">
+                                            بیوگرافی: {{profile_form.description}}
+                                        </p>
+                                        <p class="text-mouted">
+                                            نمایش شماره: {{profile_form.show_phone}}
+                                        </p>
+                                        <button type="submit">ذخیره تغییرات</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                    </div>
+                    <div class="row justify-content-center">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="row">
+    <div class="col">
+        <div class="row">
+            <div class="img_cont">
+                <img src="{{profile.image.url}}" class="rounded-circle user_img" alt="">
+            </div>
+            <input type="image" class="btn btn-warning">
+        </div>
+    </div>
+</div> -->
+{% endblock %}
