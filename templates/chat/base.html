@@ -339,27 +339,23 @@
                             {% if private_chats %}
                             {% for chat in private_chats %}
                             <li>
-                                {% for user in chat.users.all %}
-                                    {% if user.username != request.user.username %}
-                                        <a href="/chat/u/{{user.username}}/" style="text-decoration: none;">
-                                            <div class="d-flex bd-highlight">
-                                                <div class="img_cont">
-                                                    <img
-                                                    {% if user.profile.image %}
-                                                    src="{{user.profile.image.url}}"
-                                                    {% else %}
-                                                    src="{% static 'images/default-profile.png' %}"
-                                                    {% endif %} class="rounded-circle user_img">
-                                                    <span class="online_icon"></span>
-                                                </div>
-                                                <div class="user_info">
-                                                    <span>{{user.username}}</span>
-                                                    <!-- <p>Kalid is online</p> -->
-                                                </div>
-                                            </div>
-                                        </a>
-                                    {% endif %}
-                                {% endfor %}
+                                <a href="/chat/u/{{chat.user2.username}}/" style="text-decoration: none;">
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img
+                                            {% if user.profile.image %}
+                                            src="{{chat.user2.profile.image.url}}"
+                                            {% else %}
+                                            src="{% static 'images/default-profile.png' %}"
+                                            {% endif %} class="rounded-circle user_img">
+                                            <span class="online_icon"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>{{user.username}}</span>
+                                            <!-- <p>Kalid is online</p> -->
+                                        </div>
+                                    </div>
+                                </a>
                             </li>
                             {% endfor %}
                             {% else %}
@@ -532,7 +528,7 @@
                             tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form action="" method="post" dir="rtl">
+                                    <form action="/chat/" method="post" dir="rtl">
                                         {% csrf_token %}
                                         <div class="modal-header">
                                             <h3 class="modal-title fs-5" id="staticBackdropLabel">چت شخصی
