@@ -29,7 +29,22 @@ class ChatView(LoginRequiredMixin, View):
                 private_chat = PrivateChat.objects.get_or_create(user1=request.user, user2=receive)
                 return redirect('chat:private-chat', username=username_receive)
             except:
-                pass
+                self.context.update({'msg': 'user not found'})
         else:
             self.context.update({'msg': 'user not found'})
         return render(request, self.template_name, self.context)
+
+
+class PrivateChateView(LoginRequiredMixin, generic.ListView):
+    template_name = 'chat/private_chat.html'
+    context_object_name = 'messages'
+    
+    def get_queryset(self):
+        chat = get_object_or_404(PrivateChat, user1__username=self.request.user.username, user2__username=self.kwargs['username'])
+        return PrivateMessage.objects.filter(chat=chat)
+    
+    def get_context_data(self):
+        context = super().get_context_data()
+        context['private_chats'] = PrivateChat.objects.filter(user1=self.request.user, user2__username=self.kwargs['username'])
+        context['target_user'] = User.objects.get(username=self.kwargs['username'])
+        return context

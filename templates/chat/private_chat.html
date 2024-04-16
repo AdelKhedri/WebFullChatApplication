@@ -1,0 +1,162 @@
+{% extends 'chat/base.html' %}
+{% load static %}
+
+{% block chatpage %}
+<div class="card-header msg_head" id="chat-header">
+    <div class="d-flex bd-highlight">
+        <div class="img_cont">
+            {% if request.user.profile.image %}
+            <img src="{{target_user.profile.image.url}}" class="rounded-circle user_img_msg">
+            {% else %}
+            <img src="{% static 'images/default-profile.png' %}" class="rounded-circle user_img_msg">
+            {% endif %}
+            <span class="online_icon"></span>
+        </div>
+        <a href="#" class="text-danger" style="text-decoration: none;" onclick="OpenProfile()">
+            <div class="user_info">
+                <span>{{target_user.get_full_name|default:''}}</span>
+                <p class="my-0"><span id="member_count">{{member_count}}</span> Member</p>
+                <p>{{messages.count}} Messages</p>
+            </div>
+        </a>
+    </div>
+    <span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+    <div class="action_menu">
+        <ul>
+            <li onclick="OpenProfile()"><i class="fas fa-user-circle"></i> View profile</li>
+            <li><i class="fas fa-plus"></i><a href="leave">Leave Group</a></li>
+            <li><i class="fas fa-plus"></i> Add to group</li>
+            <li><i class="fas fa-users"></i> Add to close friends</li>
+            <li><i class="fas fa-ban"></i> Block</li>
+        </ul>
+    </div>
+</div>
+<div class="card-body msg_card_body" id="chat-body">
+    {% if messages %}
+        {% for msg in messages %}
+            {% if msg.sender == request.user %}
+            <div class="d-flex justify-content-end mb-4">
+                <div class="msg_cotainer_send">
+                    {{msg.text}}
+                    <span class="msg_time_send">{{msg.date_time}}</span>
+                </div>
+                <div class="img_cont_msg">
+                    {% if request.user.profile.image %}
+                    <img src="{{target_user.profile.image.url}}" class="rounded-circle user_img_msg">
+                    {% else %}
+                    <img src="{% static 'images/31.jpg' %}" class="rounded-circle user_img_msg">
+                    {% endif %}
+                    
+                </div>
+            </div>
+            {% else %}
+            <div class="d-flex justify-content-start mb-4">
+                <div class="img_cont_msg">
+                    {% if target_user.profile.image %}
+                    <img src="{{target_user.profile.image.url}}" class="rounded-circle user_img_msg">
+                    {% else %}
+                    <img src="{% static 'images/31.jpg' %}" class="rounded-circle user_img_msg">
+                    {% endif %}
+                </div>
+                <div class="msg_cotainer">
+                    {{msg.text}}
+                    <span class="msg_time">{{msg.date_time|time}}</span>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+
+</div>
+
+<div id="chat-profile" style="display: none;">
+    <div class="card" style="height: auto;">
+        <div class="card-title">
+            <button class="btn btn-primary" onclick="OpenProfile()"><svg
+                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30">
+                    <path
+                        d="M10.78 19.03a.75.75 0 0 1-1.06 0l-6.25-6.25a.75.75 0 0 1 0-1.06l6.25-6.25a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L5.81 11.5h14.44a.75.75 0 0 1 0 1.5H5.81l4.97 4.97a.75.75 0 0 1 0 1.06Z">
+                    </path>
+                </svg></button>
+        </div>
+    </div>
+    <div class="row2 justify-content-center">
+        {% if request.user.profile.image %}
+            <img src="{{target_user.profile.image.url}}" class="rounded-circle"
+            style="max-width: 300px;max-height: 300px;" alt="">
+            {% else %}
+            <img src="{% static 'images/default-profile.png' %}" class="rounded-circle"
+            style="max-width: 300px;max-height: 300px;" alt="">
+            {% endif %}
+    </div>
+    <div class="row justify-content-center">
+        <div class="row">
+            <div class="col">
+                <div class="card p-4 text-white" style="height: auto;">
+                    <p>name: {{target_user.get_full_name}}</p>
+                    <p class="text-mouted">
+                        username: <input type="text" disabled placeholder="http://127.0.0.1:8000/chat/u/{{target_user.username}}/">
+                        <button class="btn btn-warning"
+                            onclick="navigator.clipboard.writeText('http://127.0.0.1:8000/chat/group/{{chat.address}}')">copy</button>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="row justify-content-center">
+    </div>
+    <div class="row justify-content-center">
+    </div>
+</div>
+
+
+<div class="card-footer" id="chat-footer">
+    <div class="input-group">
+        <div class="input-group-append">
+            <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
+        </div>
+        <textarea name="new-message" id="new-message" class="form-control type_msg"
+            placeholder="Type your message..."></textarea>
+        <div id="submit_new_message" class="input-group-append">
+            <span onclick="Add_new_message()" class="input-group-text send_btn"><i
+                    class="fas fa-location-arrow"></i></span>
+        </div>
+    </div>
+</div>
+<script>
+    var chat_header = document.getElementById('chat-header');
+    var chat_body = document.getElementById('chat-body');
+    var chat_body2 = $('#chat-body');
+    var chat_foter = document.getElementById('chat-footer');
+    var chat_profile = document.getElementById('chat-profile');
+    var profile_counter = 1;
+
+    function OpenProfile() {
+
+        profile_counter += 1;
+
+        if (profile_counter % 2 != 0) {
+            chat_body.style.display = "block";
+            chat_header.style.display = "block";
+            chat_foter.style.display = "block";
+            console.log(chat_profile.style.display)
+            chat_profile.style.display = "none";
+        }
+
+        if (profile_counter % 2 === 0) {
+            chat_body.style.display = "none";
+            chat_header.style.display = "none";
+            chat_foter.style.display = "none";
+            chat_profile.style.display = "block";
+        }
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#action_menu_btn').click(function () {
+            $('.action_menu').toggle();
+        });
+    });	</script>
+{% endblock %}
