@@ -23,7 +23,7 @@ class LoginView(View):
             print(user)
             if user is not None:
                 login(request, user=user)
-                return redirect('/admin/')
+                return redirect('chat:main')
         
         return render(request, self.template_name, {'form': userForm})
 
@@ -49,7 +49,6 @@ class SinUpView(View):
 
 class ChangeProfileView(LoginRequiredMixin, View):
     template_name = 'user/edite_profile.html'
-    login_url = '/login/'
 
     def get(self, request, *args, **kwargs):
         context = {

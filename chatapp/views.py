@@ -6,7 +6,7 @@ from user.models import User
 from django.db.models import Q
 
 
-class ChatView(View):
+class ChatView(LoginRequiredMixin, View):
     template_name = 'chat/base.html'
 
     def setup(self, request, *args, **kwargs):
@@ -14,6 +14,8 @@ class ChatView(View):
             self.context = {
                 'private_chats': PrivateChat.objects.prefetch_related('users').filter(users=request.user),
             }
+        else:
+            self.context = {}
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
