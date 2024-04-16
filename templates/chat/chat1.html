@@ -1,0 +1,683 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex, nofollow">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" id="bootstrap-css">
+    <link rel="application/javascript" href="https://code.jquery.com/jquery-3.7.1.js">
+    <title>Chat</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css">
+    <!-- <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+        integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous"> -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery.mCustomScrollbar.min.css' %}">
+
+    <!-- None of the “sha384” hashes in the integrity attribute match the content of the subresource. The computed hash is “XiW7tE8ABOM2cTfbIWN4SJCTbCH2iOSfwhRPqURoWfnCFF8Q1JUlDQRdOP4YiLsM”. qwgvd
+ -->
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        window.alert = function () { };
+        var defaultCSS = document.getElementById('bootstrap-css');
+        function changeCSS(css) {
+            if (css) $('head > link').filter(':first').replaceWith('<link rel="stylesheet" href="' + css + '" type="text/css" />');
+            else $('head > link').filter(':first').replaceWith(defaultCSS);
+        }
+        $(document).ready(function () {
+            var iframe_height = parseInt($('html').height());
+            window.parent.postMessage(iframe_height, 'https://bootsnipp.com');
+        });
+    </script>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.mCustomScrollbar.min.js' %}"></script>
+    <style type="text/css">
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            background: #7F7FD5;
+            background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+            background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+        }
+
+        .chat {
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        .card {
+            height: 500px;
+            border-radius: 15px !important;
+            background-color: rgba(0, 0, 0, 0.4) !important;
+        }
+
+        .contacts_body {
+            padding: 0.75rem 0 !important;
+            overflow-y: auto;
+            white-space: nowrap;
+        }
+
+        .msg_card_body {
+            overflow-y: auto;
+        }
+
+        .card-header {
+            border-radius: 15px 15px 0 0 !important;
+            border-bottom: 0 !important;
+        }
+
+        .card-footer {
+            border-radius: 0 0 15px 15px !important;
+            border-top: 0 !important;
+        }
+
+        .container {
+            align-content: center;
+        }
+
+        .search {
+            border-radius: 15px 0 0 15px !important;
+            background-color: rgba(0, 0, 0, 0.3) !important;
+            border: 0 !important;
+            color: white !important;
+        }
+
+        .search:focus {
+            box-shadow: none !important;
+            outline: 0px !important;
+        }
+
+        .type_msg {
+            background-color: rgba(0, 0, 0, 0.3) !important;
+            border: 0 !important;
+            color: white !important;
+            height: 60px !important;
+            overflow-y: auto;
+        }
+
+        .type_msg:focus {
+            box-shadow: none !important;
+            outline: 0px !important;
+        }
+
+        .attach_btn {
+            border-radius: 15px 0 0 15px !important;
+            background-color: rgba(0, 0, 0, 0.3) !important;
+            border: 0 !important;
+            color: white !important;
+            cursor: pointer;
+        }
+
+        .send_btn {
+            border-radius: 0 15px 15px 0 !important;
+            background-color: rgba(0, 0, 0, 0.3) !important;
+            border: 0 !important;
+            color: white !important;
+            cursor: pointer;
+        }
+
+        .search_btn {
+            border-radius: 0 15px 15px 0 !important;
+            background-color: rgba(0, 0, 0, 0.3) !important;
+            border: 0 !important;
+            color: white !important;
+            cursor: pointer;
+        }
+
+        .contacts {
+            list-style: none;
+            padding: 0;
+        }
+
+        .contacts li {
+            width: 100% !important;
+            padding: 5px 10px;
+            margin-bottom: 15px !important;
+        }
+
+        .active {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .user_img {
+            height: 70px;
+            width: 70px;
+            border: 1.5px solid #f5f6fa;
+
+        }
+
+        .user_img_msg {
+            height: 40px;
+            width: 40px;
+            border: 1.5px solid #f5f6fa;
+
+        }
+
+        .img_cont {
+            position: relative;
+            height: 70px;
+            width: 70px;
+        }
+
+        .img_cont_msg {
+            height: 40px;
+            width: 40px;
+        }
+
+        .online_icon {
+            position: absolute;
+            height: 15px;
+            width: 15px;
+            background-color: #4cd137;
+            border-radius: 50%;
+            bottom: 0.2em;
+            right: 0.4em;
+            border: 1.5px solid white;
+        }
+
+        .offline {
+            background-color: #c23616 !important;
+        }
+
+        .user_info {
+            margin-top: auto;
+            margin-bottom: auto;
+            margin-left: 15px;
+        }
+
+        .user_info span {
+            font-size: 20px;
+            color: white;
+        }
+
+        .user_info p {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .video_cam {
+            margin-left: 50px;
+            margin-top: 5px;
+        }
+
+        .video_cam span {
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            margin-right: 20px;
+        }
+
+        .msg_cotainer {
+            margin-top: auto;
+            margin-bottom: auto;
+            margin-left: 10px;
+            border-radius: 25px;
+            background-color: #82ccdd;
+            padding: 10px;
+            position: relative;
+        }
+
+        .msg_cotainer_send {
+            margin-top: auto;
+            margin-bottom: auto;
+            margin-right: 10px;
+            border-radius: 25px;
+            background-color: #78e08f;
+            padding: 10px;
+            position: relative;
+        }
+
+        .msg_time {
+            position: absolute;
+            left: 0;
+            bottom: -15px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+        }
+
+        .msg_time_send {
+            position: absolute;
+            right: 0;
+            bottom: -15px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+        }
+
+        .msg_head {
+            position: relative;
+        }
+
+        #action_menu_btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .action_menu {
+            z-index: 1;
+            position: absolute;
+            padding: 15px 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border-radius: 15px;
+            top: 30px;
+            right: 15px;
+            display: none;
+        }
+
+        .action_menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .action_menu ul li {
+            width: 100%;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+        }
+
+        .action_menu ul li i {
+            padding-right: 10px;
+
+        }
+
+        .action_menu ul li:hover {
+            cursor: pointer;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        @media(max-width: 576px) {
+            .contacts_card {
+                margin-bottom: 15px !important;
+            }
+        }
+    </style>
+</head>
+<!--Coded With Love By Mutiullah Samim-->
+
+<body>
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-md-4 col-xl-3 chat">
+                <div class="card mb-sm-3 mb-md-0 contacts_card" style="height: 100vh;">
+                    <div class="card-header">
+                        <div class="input-group">
+                            <input type="text" placeholder="Search..." name="" class="form-control search">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body contacts_body">
+                        <ui class="contacts">
+                            {% if chats %}
+                            {% for group in chats%}
+                            <li>
+                                <a href="/chat/group/{{group.chat.address}}/" style="text-decoration: none;">
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img src="{% static 'images/_D.jpg' %}" class="rounded-circle user_img">
+                                            <span class="online_icon"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>{{group.chat.title}}</span>
+                                            <!-- <p>Kalid is online</p> -->
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            {% endfor %}
+                            {% else %}
+                            <p class="text-white mx-3">Nothing is heare ...</p>
+                            <p class="text-white mx-3">You dont have any chat</p>
+                            {% endif %}
+                        </ui>
+                    </div>
+                    <div class="card-footer ">
+                        <!-- Modal -->
+                        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+                            tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form action="" method="post" dir="rtl">
+                                        {% csrf_token %}
+                                        <div class="modal-header">
+                                            <h3 class="modal-title fs-5" id="staticBackdropLabel">Create new group
+                                            </h3>
+                                            <button type="button" class="btn btn-light btn-close"
+                                                data-bs-dismiss="modal" aria-label="Close">X</button>
+                                        </div>
+                                        <div class="modal-body">
+
+                                            <div class="mb-3 text-dack row">
+                                                <label for="first_name" class="col-sm-2 col-form-label">Group
+                                                    Name</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control background text-dark"
+                                                        id="first_name">
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 text-dack row">
+                                                <label for="first_name" class="col-sm-2 col-form-label">Address</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control background text-dark"
+                                                        id="first_name">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary mx-2"
+                                                data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-primary">Understood</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-end">
+                            <div class="dropdown">
+                                <button class="btn btn-primary" data-bs-toggle="dropdown" aria-expanded="false"
+                                    id="dropdownMenuButton1"
+                                    style="width: 50px;height: 50px;text-align: center;padding: 0 0;font-size: 20px;line-height: 1.42;border-radius: 20px;"><img
+                                        src="{% static 'images/add.png' %}" alt="" srcset=""></button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li>
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                            data-bs-target="#staticBackdrop">
+                                            New group
+                                        </button>
+                                    </li>
+                                    <li><a class="dropdown-item" href="#">New channel</a></li>
+                                    <li><a class="dropdown-item" href="#">New group</a></li>
+                                </ul>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8 col-xl-6 chat">
+                <div class="card" style="height: 100vh;">
+                    <div class="card-header msg_head" id="chat-header">
+                        <div class="d-flex bd-highlight">
+                            <div class="img_cont">
+                                <img src="{% static 'images/_D.jpg' %}" class="rounded-circle user_img">
+                                <span class="online_icon"></span>
+                            </div>
+                            <a href="#" class="text-danger" style="text-decoration: none;" onclick="OpenProfile()">
+                                <div class="user_info">
+                                    <span>{{chat.title}}</span>
+                                    <p class="my-0"><span id="member_count">{{member_count}}</span> Member</p>
+                                    <p>{{messages.count}} Messages</p>
+                                </div>
+                            </a>
+                            <div class="video_cam">
+                                <span><i class="fas fa-video"></i></span>
+                                <span><i class="fas fa-phone"></i></span>
+                            </div>
+                        </div>
+                        <span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+                        <div class="action_menu">
+                            <ul>
+                                <li onclick="OpenProfile()"><i class="fas fa-user-circle"></i> View profile</li>
+                                <li><i class="fas fa-plus"></i><a href="leave">Leave Group</a></li>
+                                <li><i class="fas fa-plus"></i> Add to group</li>
+                                <li><i class="fas fa-users"></i> Add to close friends</li>
+                                <li><i class="fas fa-ban"></i> Block</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body msg_card_body" id="chat-body">
+                        {% if messages %}
+                            {% for i in messages %}
+                                {% if i.author == request.user %}
+                                <div class="d-flex justify-content-end mb-4">
+                                    <div class="msg_cotainer_send">
+                                        {{i.text}}
+                                        <span class="msg_time_send">{{i.created_time|time}}{{i.created_time|time}}</span>
+                                    </div>
+                                    <div class="img_cont_msg">
+                                        <img src="{% static 'images/31.jpg' %}" class="rounded-circle user_img_msg">
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="d-flex justify-content-start mb-4">
+                                    <div class="img_cont_msg">
+                                        <img src="{% static 'images/_D.jpg' %}" class="rounded-circle user_img_msg">
+                                    </div>
+                                    <div class="msg_cotainer">
+                                        {{i.text}}
+                                        <span class="msg_time">{{i.created_time|time}}</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+
+
+
+
+                        {% if msg == 'question to join' %}
+                        <div class="card text-white">
+                            <div class="p-5">
+                                <p>You dont joined to this group. <br>
+                                    if you whant to join on this is group?
+                                </p>
+                                <form action="" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn btn-primary">Yes</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer" id="chat-footer">
+                        <!-- <form action="" id="form-send-message" method="post"> -->
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <div class="input-group-append">
+                                    <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
+                                </div>
+                                <textarea name="new-message" id="new-message" class="form-control type_msg" placeholder="Type your message..."></textarea>
+                                <div id="submit_new_message" class="input-group-append">
+                                    <span onclick="Add_new_message()" class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
+                                </div>
+                            </div>
+                        <!-- </form> -->
+                    </div>
+                    <div id="chat-profile" style="display: none;">
+                        <div class="card" style="height: auto;">
+                            <div class="card-title">
+                                <button class="btn btn-primary" onclick="OpenProfile()"><svg
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30">
+                                        <path
+                                            d="M10.78 19.03a.75.75 0 0 1-1.06 0l-6.25-6.25a.75.75 0 0 1 0-1.06l6.25-6.25a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L5.81 11.5h14.44a.75.75 0 0 1 0 1.5H5.81l4.97 4.97a.75.75 0 0 1 0 1.06Z">
+                                        </path>
+                                    </svg></button>
+                            </div>
+                        </div>
+                        <div class="row2 justify-content-center">
+                            <img src="{% static 'images/33.jpg' %}" class="rounded-circle"
+                                style="max-width: 300px;max-height: 300px;" alt="">
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="card p-4 text-white" style="height: auto;">
+                                        <p>name: {{chat.title}}</p>
+                                        <!-- <p>Last name: khedri</p> -->
+                                        <p class="text-mouted">
+                                            username: <input type="text" disabled placeholder="@{{chat.address}}">
+                                            <button class="btn btn-warning"
+                                                onclick="navigator.clipboard.writeText('http://127.0.0.1:8000/chat/group/{{chat.address}}')">copy</button>
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                        </div>
+                        <div class="row justify-content-center">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        var chat_header = document.getElementById('chat-header');
+        var chat_body = document.getElementById('chat-body');
+        var chat_body2 = $('#chat-body');
+        var chat_foter = document.getElementById('chat-footer');
+        var chat_profile = document.getElementById('chat-profile');
+        var profile_counter = 1;
+
+        function OpenProfile() {
+
+            profile_counter += 1;
+
+            if (profile_counter % 2 != 0) {
+                chat_body.style.display = "block";
+                chat_header.style.display = "block";
+                chat_foter.style.display = "block";
+                chat_profile.style.display = "none";
+            }
+
+            if (profile_counter % 2 === 0) {
+                chat_body.style.display = "none";
+                chat_header.style.display = "none";
+                chat_foter.style.display = "none";
+                chat_profile.style.display = "block";
+            }
+        }
+
+        // var message_box = document.getElementById('message-box');
+        var audio_send = new Audio("{% static 'sound/send.mp3' %}");
+        var audio_receive = new Audio("{% static 'sound/receive.mp3' %}");
+        var text = document.getElementById('new-message');
+        var form = document.getElementById('form-send-message');
+        var my_username = '{{request.user.username}}'
+        var chat_id = '{{chat.address}}'
+        // var chat_id = 'programers'
+        var member_count = document.getElementById('member_count');
+
+
+        text.focus();
+        function Add_new_message() {
+            audio_send.play();
+            chat_body.innerHTML +=
+                `<div class="d-flex justify-content-end mb-4">
+                        <div class="msg_cotainer_send">
+                            ${text.value}
+                            <span class="msg_time_send">9:10 AM, Today</span>
+                        </div>
+                        <div class="img_cont_msg">
+                            <img src="{% static 'images/31.jpg' %}" class="rounded-circle user_img_msg">
+                        </div>
+                    </div>`;
+        }
+
+        var socket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/group/' + chat_id + '/'
+        );
+
+        socket.onmessage = function(e) {
+            console.log(e.data);
+            var message = JSON.parse(e.data);
+
+            switch (message['type']) {
+                case "join":
+                    chat_body.innerHTML += `<div class="d-flex justify-content-center mb-4">
+                                <div class="msg_cotainer_send bg-light9 text-dack">
+                                    USERNAME joined to group.
+                                </div>
+                            </div>`.replace({'USERNAME': message['user']})
+                    member_count.innerHTML = message['members_count']
+                    break;
+                case "left":
+                    chat_body.innerHTML += `<div class="d-flex justify-content-center mb-4">
+                                <div class="msg_cotainer_send bg-light9 text-dack">
+                                    ${message['user']} left the group.
+                                </div>
+                            </div>`;
+                    member_count.innerHTML = message['members_count']
+                    break;
+                case "delete":
+                    alert("group was deleted.");
+                    window.location.href = window.origin + '/chat/'
+                    break;
+                case "msg":
+                if (message['user'] === my_username){
+                    // audio_send.play();
+                    // chat_body.innerHTML += `<div class="d-flex justify-content-end mb-4">
+                    //             <div class="msg_cotainer_send">
+                    //                 ${message['text']}
+                    //                 <span class="msg_time_send">8:55 AM, Today</span>
+                    //             </div>
+                    //             <div class="img_cont_msg">
+                    //                 <img src="http://127.0.0.1:8000/static/images/_D.jpg" class="rounded-circle user_img_msg">
+                    //             </div>
+                    //         </div>`;
+                    }else {
+                        audio_receive.play();
+                        chat_body.innerHTML += `<div class="d-flex justify-content-start mb-4">
+                            <div class="img_cont_msg">
+                                <img src="http://127.0.0.1:8000/static/images/31.jpg" class="rounded-circle user_img_msg">
+                            </div>
+                            <div class="msg_cotainer">
+                                ${message['text']}
+                                <span class="msg_time">8:40 AM, Today</span>
+                            </div>
+                        </div>`;
+                        document.getElementById("submit_new_message").addEventListener('click', function () {
+                            chat_body.scrollTop = chat_body.scrollHeight;
+                        });
+                    }
+                    break;
+                    default:
+                        break;
+                }
+            document.getElementById("submit_new_message").addEventListener('click', function () {
+                chat_body.scrollTop = chat_body.scrollHeight;
+            });
+        }
+
+        socket.onclose = function (e){
+            console.log('websocket connection closed.');
+        }
+
+        // document.getElementById("submit_new_message").addEventListener('click', function () {
+        //     chat_body.scrollTop = chat_body.scrollHeight;
+        // });
+        
+        document.getElementById("submit_new_message").onclick = function (e){
+
+            socket.send(JSON.stringify({'text': text.value}));
+            chat_body.scrollTop = chat_body.scrollHeight;
+            text.value = "";
+            text.focus();
+        }
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#action_menu_btn').click(function () {
+                $('.action_menu').toggle();
+            });
+        });	</script>
+</body>
+</html>
