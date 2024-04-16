@@ -1,9 +1,8 @@
-from django.shortcuts import render, redirect
-from django.views import View
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views import View, generic
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import PrivateChat
+from .models import PrivateChat, PrivateMessage
 from user.models import User
-from django.db.models import Q
 
 
 class ChatView(LoginRequiredMixin, View):
@@ -12,7 +11,7 @@ class ChatView(LoginRequiredMixin, View):
     def setup(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             self.context = {
-                'private_chats': PrivateChat.objects.prefetch_related('users').filter(users=request.user),
+                'private_chats': PrivateChat.objects.filter(user1=request.user),
             }
         else:
             self.context = {}
@@ -27,12 +26,8 @@ class ChatView(LoginRequiredMixin, View):
         if username_receive:
             try:
                 receive = User.objects.get(username=username_receive)
-                private_chat = PrivateChat.objects.prefetch_related('users').filter(users=receive).filter(users=request.user).exists()
-                if not private_chat:
-                    private_chat = PrivateChat.objects.create()
-                    private_chat.users.set([receive, request.user])
-                    private_chat.save()
-                return redirect('chat:main', username=username_receive)
+                private_chat = PrivateChat.objects.get_or_create(user1=request.user, user2=receive)
+                return redirect('chat:private-chat', username=username_receive)
             except:
                 pass
         else:

@@ -4,7 +4,7 @@ from django.contrib import admin
 
 
 class PrivateChatRegistration(admin.ModelAdmin):
-    list_display = ['date_time', 'users_str_list']
+    list_display = ['date_time', 'user1', 'user2']
     search_fields = ['users']
     list_per_page = 40
 

@@ -3,14 +3,12 @@ from user.models import User
 
 
 class PrivateChat(models.Model):
-    users = models.ManyToManyField(User, related_name='users')
+    user1 = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='user1')
+    user2 = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='user2')
     date_time = models.DateTimeField(auto_now_add=True, verbose_name='زمان ساخت چت')
-
-    def users_str_list(self):
-        return ' '.join([user.username for user in self.users.all()])
     
     def __str__(self):
-        return f"{self.users.all().first().username} & {self.users.all().last().username}"
+        return f"{self.user1.username} & {self.user2.username}"
 
 
 class PrivateMessage(models.Model):
