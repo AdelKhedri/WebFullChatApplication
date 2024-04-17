@@ -88,6 +88,3 @@ class PrivateChatsConsumer(AsyncConsumer):
         chat = PrivateChat.objects.get(id=self.private_chat[2])
         target_user = User.objects.get(username=self.target_username)
         PrivateMessage.objects.create(sender=self.scope['user'], receiver=target_user, chat=chat, text=message)
-    
-    
-    # async def sendMessageChat(self, event):

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View, generic
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import PrivateChat, PrivateMessage
+from .models import PrivateChat, PrivateMessage, GroupChat
 from user.models import User
 from django.db.models import Q
 
@@ -13,9 +13,8 @@ class ChatView(LoginRequiredMixin, View):
         if request.user.is_authenticated:
             self.context = {
                 'private_chats': PrivateChat.objects.filter(Q(user1=request.user) | Q(user2=request.user)),
+                'group_chats': GroupChat.objects.filter(members=request.user),
             }
-        else:
-            self.context = {}
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -31,8 +30,15 @@ class ChatView(LoginRequiredMixin, View):
                 return redirect('chat:private-chat', username=username_receive)
             except:
                 self.context.update({'msg': 'user not found'})
-        else:
-            self.context.update({'msg': 'user not found'})
+        
+        group_name = request.POST.get('group_name', None)
+        group_description = request.POST.get('group_description', None)
+        if group_name:
+            new_group = GroupChat(name = group_name, description=group_description, manager=request.user)
+            new_group.save()
+            new_group.members.add(request.user)
+            new_group.save()
+            redirect('chat:main')
         return render(request, self.template_name, self.context)
 
 
@@ -49,3 +55,4 @@ class PrivateChateView(LoginRequiredMixin, generic.ListView):
         context['private_chats'] = PrivateChat.objects.filter(Q(user1=self.request.user) | Q(user2=self.request.user))
         context['target_user'] = User.objects.get(username=self.kwargs['username'])
         return context
+

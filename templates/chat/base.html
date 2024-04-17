@@ -383,17 +383,21 @@
                             {% endif %}
                         </ui>
                         <ui class="contacts" id="group-tab" style="display: none;">
-                            {% if chats %}
-                            {% for group in chats%}
+                            {% if group_chats %}
+                            {% for group in group_chats%}
                             <li>
-                                <a href="/chat/group/{{group.chat.address}}/" style="text-decoration: none;">
+                                <a href="/chat/group/{{group.address}}/" style="text-decoration: none;">
                                     <div class="d-flex bd-highlight">
                                         <div class="img_cont">
-                                            <img src="{% static 'images/_D.jpg' %}" class="rounded-circle user_img">
+                                            {% if group.image %}
+                                            <img src="{{group.image.url}}" class="rounded-circle user_img">
+                                            {% else %}
+                                            <img src="{% static 'images/default-group-image.png' %}" class="rounded-circle user_img">
+                                            {% endif %}
                                             <span class="online_icon"></span>
                                         </div>
                                         <div class="user_info">
-                                            <span>{{group.chat.title}}</span>
+                                            <span>{{group.name}}</span>
                                             <!-- <p>Kalid is online</p> -->
                                         </div>
                                     </div>
@@ -507,7 +511,7 @@
                             tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form action="" method="post" dir="rtl">
+                                    <form action="{% url 'chat:main' %}" method="post" dir="rtl">
                                         {% csrf_token %}
                                         <div class="modal-header">
                                             <h3 class="modal-title fs-5" id="staticBackdropLabel">ساخت گروه جدید
@@ -520,15 +524,13 @@
                                             <div class="mb-3 text-dack row">
                                                 <label for="first_name" class="col-sm-2 col-form-label">نام گروه</label>
                                                 <div class="col-sm-8">
-                                                    <input type="text" class="form-control background text-dark"
-                                                        id="first_name">
+                                                    <input type="text" class="form-control background text-dark" name="group_name">
                                                 </div>
                                             </div>
                                             <div class="mb-3 text-dack row">
                                                 <label for="first_name" class="col-sm-2 col-form-label">درباره گروه</label>
                                                 <div class="col-sm-8">
-                                                    <input type="text" class="form-control background text-dark"
-                                                        id="first_name">
+                                                    <input type="text" class="form-control background text-dark" name="group_description">
                                                 </div>
                                             </div>
                                         </div>

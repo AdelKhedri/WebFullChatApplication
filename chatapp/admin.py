@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import PrivateChat, PrivateMessage
+from .models import PrivateChat, PrivateMessage, GroupChat, GroupMessage
 from django.contrib import admin
 
 
@@ -18,3 +18,5 @@ class PrivateMessageRegistration(admin.ModelAdmin):
 
 admin.site.register(PrivateChat, PrivateChatRegistration)
 admin.site.register(PrivateMessage, PrivateMessageRegistration)
+admin.site.register(GroupChat)
+admin.site.register(GroupMessage)
