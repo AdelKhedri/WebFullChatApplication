@@ -339,23 +339,43 @@
                             {% if private_chats %}
                             {% for chat in private_chats %}
                             <li>
-                                <a href="/chat/u/{{chat.user2.username}}/" style="text-decoration: none;">
-                                    <div class="d-flex bd-highlight">
-                                        <div class="img_cont">
-                                            <img
-                                            {% if user.profile.image %}
-                                            src="{{chat.user2.profile.image.url}}"
-                                            {% else %}
-                                            src="{% static 'images/default-profile.png' %}"
-                                            {% endif %} class="rounded-circle user_img">
-                                            <span class="online_icon"></span>
+                                {% if chat.user2 != request.user %}
+                                    <a href="/chat/u/{{chat.user2.username}}/" style="text-decoration: none;">
+                                        <div class="d-flex bd-highlight">
+                                            <div class="img_cont">
+                                                <img
+                                                {% if chat.user2.profile.image %}
+                                                    src="{{chat.user2.profile.image.url}}"
+                                                {% else %}
+                                                    src="{% static 'images/default-profile.png' %}"
+                                                {% endif %} class="rounded-circle user_img">
+                                                <span class="online_icon"></span>
+                                            </div>
+                                            <div class="user_info">
+                                                <span>{{chat.user2.username}}</span>
+                                                <!-- <p>Kalid is online</p> -->
+                                            </div>
                                         </div>
-                                        <div class="user_info">
-                                            <span>{{user.username}}</span>
-                                            <!-- <p>Kalid is online</p> -->
+                                    </a>
+                                {% else %}
+                                    <a href="/chat/u/{{chat.user1.username}}/" style="text-decoration: none;">
+                                        <div class="d-flex bd-highlight">
+                                            <div class="img_cont">
+                                                <img
+                                                {% if chat.user1.profile.image %}
+                                                src="{{chat.user1.profile.image.url}}"
+                                                {% else %}
+                                                src="{% static 'images/default-profile.png' %}"
+                                                {% endif %} class="rounded-circle user_img">
+                                                <span class="online_icon"></span>
+                                            </div>
+                                            <div class="user_info">
+                                                <span>{{chat.user1.username}}</span>
+                                                <!-- <p>Kalid is online</p> -->
+                                            </div>
                                         </div>
-                                    </div>
-                                </a>
+                                    </a>
+                                {% endif %}
                             </li>
                             {% endfor %}
                             {% else %}
@@ -416,7 +436,6 @@
                             var channels_tab = document.getElementById('channels-tab').style;
 
                             function show_tab(tab){
-                                console.log(tab)
                                 if (tab === 'private-chat-btn'){
                                     private_tab.display = 'block';
                                     group_tab.display = 'none';
@@ -584,140 +603,8 @@
     </div>
 
 
-    <!-- <script>
-        var chat_header = document.getElementById('chat-header');
-        var chat_body = document.getElementById('chat-body');
-        var chat_body2 = $('#chat-body');
-        var chat_foter = document.getElementById('chat-footer');
-        var chat_profile = document.getElementById('chat-profile');
-        var profile_counter = 1;
-
-        function OpenProfile() {
-
-            profile_counter += 1;
-
-            if (profile_counter % 2 != 0) {
-                chat_body.style.display = "block";
-                chat_header.style.display = "block";
-                chat_foter.style.display = "block";
-                chat_profile.style.display = "none";
-            }
-
-            if (profile_counter % 2 === 0) {
-                chat_body.style.display = "none";
-                chat_header.style.display = "none";
-                chat_foter.style.display = "none";
-                chat_profile.style.display = "block";
-            }
-        }
-
-        // var message_box = document.getElementById('message-box');
-        var audio_send = new Audio("{% static 'sound/send.mp3' %}");
-        var audio_receive = new Audio("{% static 'sound/receive.mp3' %}");
-        var text = document.getElementById('new-message');
-        var form = document.getElementById('form-send-message');
-        var my_username = '{{request.user.username}}'
-        var chat_id = '{{chat.address}}'
-        // var chat_id = 'programers'
-        var member_count = document.getElementById('member_count');
-
-
-        text.focus();
-        function Add_new_message() {
-            audio_send.play();
-            chat_body.innerHTML +=
-                `<div class="d-flex justify-content-end mb-4">
-                        <div class="msg_cotainer_send">
-                            ${text.value}
-                            <span class="msg_time_send">9:10 AM, Today</span>
-                        </div>
-                        <div class="img_cont_msg">
-                            <img src="{% static 'images/31.jpg' %}" class="rounded-circle user_img_msg">
-                        </div>
-                    </div>`;
-        }
-
-        var socket = new WebSocket(
-            'ws://' + window.location.host + '/ws/chat/group/' + chat_id + '/'
-        );
-
-        socket.onmessage = function(e) {
-            console.log(e.data);
-            var message = JSON.parse(e.data);
-
-            switch (message['type']) {
-                case "join":
-                    chat_body.innerHTML += `<div class="d-flex justify-content-center mb-4">
-                                <div class="msg_cotainer_send bg-light9 text-dack">
-                                    USERNAME joined to group.
-                                </div>
-                            </div>`.replace({'USERNAME': message['user']})
-                    member_count.innerHTML = message['members_count']
-                    break;
-                case "left":
-                    chat_body.innerHTML += `<div class="d-flex justify-content-center mb-4">
-                                <div class="msg_cotainer_send bg-light9 text-dack">
-                                    ${message['user']} left the group.
-                                </div>
-                            </div>`;
-                    member_count.innerHTML = message['members_count']
-                    break;
-                case "delete":
-                    alert("group was deleted.");
-                    window.location.href = window.origin + '/chat/'
-                    break;
-                case "msg":
-                if (message['user'] === my_username){
-                    // audio_send.play();
-                    // chat_body.innerHTML += `<div class="d-flex justify-content-end mb-4">
-                    //             <div class="msg_cotainer_send">
-                    //                 ${message['text']}
-                    //                 <span class="msg_time_send">8:55 AM, Today</span>
-                    //             </div>
-                    //             <div class="img_cont_msg">
-                    //                 <img src="http://127.0.0.1:8000/static/images/_D.jpg" class="rounded-circle user_img_msg">
-                    //             </div>
-                    //         </div>`;
-                    }else {
-                        audio_receive.play();
-                        chat_body.innerHTML += `<div class="d-flex justify-content-start mb-4">
-                            <div class="img_cont_msg">
-                                <img src="http://127.0.0.1:8000/static/images/31.jpg" class="rounded-circle user_img_msg">
-                            </div>
-                            <div class="msg_cotainer">
-                                ${message['text']}
-                                <span class="msg_time">8:40 AM, Today</span>
-                            </div>
-                        </div>`;
-                        document.getElementById("submit_new_message").addEventListener('click', function () {
-                            chat_body.scrollTop = chat_body.scrollHeight;
-                        });
-                    }
-                    break;
-                    default:
-                        break;
-                }
-            document.getElementById("submit_new_message").addEventListener('click', function () {
-                chat_body.scrollTop = chat_body.scrollHeight;
-            });
-        }
-
-        socket.onclose = function (e){
-            console.log('websocket connection closed.');
-        }
-
-        // document.getElementById("submit_new_message").addEventListener('click', function () {
-        //     chat_body.scrollTop = chat_body.scrollHeight;
-        // });
-        
-        document.getElementById("submit_new_message").onclick = function (e){
-
-            socket.send(JSON.stringify({'text': text.value}));
-            chat_body.scrollTop = chat_body.scrollHeight;
-            text.value = "";
-            text.focus();
-        }
-    </script> -->
+    {% block websocket %}
+    {% endblock %}
 </body>
 
 </html>

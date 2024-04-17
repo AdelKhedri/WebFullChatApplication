@@ -19,7 +19,7 @@ class User(AbstractUser):
         if self.last_name or self.first_name:
             return f"{self.first_name} {self.last_name}"
         else:
-            return str(self.phone_number)
+            return str(self.username)
 
 
 class Profile(models.Model):
