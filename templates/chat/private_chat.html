@@ -5,7 +5,7 @@
 <div class="card-header msg_head" id="chat-header">
     <div class="d-flex bd-highlight">
         <div class="img_cont">
-            {% if request.user.profile.image %}
+            {% if target_user.profile.image %}
             <img src="{{target_user.profile.image.url}}" class="rounded-circle user_img_msg">
             {% else %}
             <img src="{% static 'images/default-profile.png' %}" class="rounded-circle user_img_msg">
@@ -14,9 +14,8 @@
         </div>
         <a href="#" class="text-danger" style="text-decoration: none;" onclick="OpenProfile()">
             <div class="user_info">
-                <span>{{target_user.get_full_name|default:''}}</span>
-                <p class="my-0"><span id="member_count">{{member_count}}</span> Member</p>
-                <p>{{messages.count}} Messages</p>
+                <span>{{target_user.get_full_name|default:'NOT NAME'}}</span>
+                <p><span id="message-count">{{messages.count}}</span> <span>پیام</span></p>
             </div>
         </a>
     </div>
@@ -42,9 +41,9 @@
                 </div>
                 <div class="img_cont_msg">
                     {% if request.user.profile.image %}
-                    <img src="{{target_user.profile.image.url}}" class="rounded-circle user_img_msg">
+                    <img src="{{request.user.profile.image.url}}" class="rounded-circle user_img_msg">
                     {% else %}
-                    <img src="{% static 'images/31.jpg' %}" class="rounded-circle user_img_msg">
+                    <img src="{% static 'images/default-profile.png' %}" class="rounded-circle user_img_msg">
                     {% endif %}
                     
                 </div>
@@ -55,7 +54,7 @@
                     {% if target_user.profile.image %}
                     <img src="{{target_user.profile.image.url}}" class="rounded-circle user_img_msg">
                     {% else %}
-                    <img src="{% static 'images/31.jpg' %}" class="rounded-circle user_img_msg">
+                    <img src="{% static 'images/default-profile.png' %}" class="rounded-circle user_img_msg">
                     {% endif %}
                 </div>
                 <div class="msg_cotainer">
@@ -82,23 +81,23 @@
         </div>
     </div>
     <div class="row2 justify-content-center">
-        {% if request.user.profile.image %}
+        {% if target_user.profile.image %}
             <img src="{{target_user.profile.image.url}}" class="rounded-circle"
             style="max-width: 300px;max-height: 300px;" alt="">
-            {% else %}
+        {% else %}
             <img src="{% static 'images/default-profile.png' %}" class="rounded-circle"
             style="max-width: 300px;max-height: 300px;" alt="">
-            {% endif %}
+        {% endif %}
     </div>
     <div class="row justify-content-center">
         <div class="row">
             <div class="col">
                 <div class="card p-4 text-white" style="height: auto;">
-                    <p>name: {{target_user.get_full_name}}</p>
+                    <p>name: {{target_user.get_full_name|default:'NOT NAME'}}</p>
                     <p class="text-mouted">
                         username: <input type="text" disabled placeholder="http://127.0.0.1:8000/chat/u/{{target_user.username}}/">
                         <button class="btn btn-warning"
-                            onclick="navigator.clipboard.writeText('http://127.0.0.1:8000/chat/group/{{chat.address}}')">copy</button>
+                            onclick="navigator.clipboard.writeText('http://127.0.0.1:8000/chat/u/{{target_user.username}}')">copy</button>
                     </p>
                 </div>
             </div>
@@ -120,11 +119,20 @@
         <textarea name="new-message" id="new-message" class="form-control type_msg"
             placeholder="Type your message..."></textarea>
         <div id="submit_new_message" class="input-group-append">
-            <span onclick="Add_new_message()" class="input-group-text send_btn"><i
+            <span onclick="" class="input-group-text send_btn"><i
                     class="fas fa-location-arrow"></i></span>
         </div>
     </div>
 </div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#action_menu_btn').click(function () {
+            $('.action_menu').toggle();
+        });
+    });	</script>
+{% endblock %}
+
+{% block websocket %}
 <script>
     var chat_header = document.getElementById('chat-header');
     var chat_body = document.getElementById('chat-body');
@@ -141,7 +149,6 @@
             chat_body.style.display = "block";
             chat_header.style.display = "block";
             chat_foter.style.display = "block";
-            console.log(chat_profile.style.display)
             chat_profile.style.display = "none";
         }
 
@@ -152,11 +159,69 @@
             chat_profile.style.display = "block";
         }
     }
+
+    var audio_send = new Audio("{% static 'sound/send.mp3' %}");
+    var audio_receive = new Audio("{% static 'sound/receive.mp3' %}");
+    var text = document.getElementById('new-message');
+    var form = document.getElementById('form-send-message');
+    var my_username = '{{request.user.username}}'
+    var member_count = document.getElementById('member_count');
+    var message_count = document.getElementById('message-count');
+
+    text.focus();
+    var socket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/?username={{target_user.username}}'
+    );
+    var default_msg = {{messages.count}}
+    socket.onmessage = function(e) {
+        var message = JSON.parse(e.data);
+        message_count.innerHTML = default_msg++;
+        if (message['sender'] === my_username){
+            audio_send.play();
+            chat_body.innerHTML += `<div class="d-flex justify-content-end mb-4">
+                        <div class="msg_cotainer_send">
+                            ${message['text']}
+                            <span class="msg_time_send">8:55 AM, Today</span>
+                        </div>
+                        <div class="img_cont_msg">
+                            {% if request.user.profile.image %}
+                            <img src="{{request.user.profile.image.url}}" class="rounded-circle user_img_msg">
+                            {% else %}
+                            <img src="{% static 'images/default-profile.png' %}" class="rounded-circle user_img_msg">
+                            {% endif %}
+                        </div>
+                    </div>`;
+            }else {
+                audio_receive.play();
+                chat_body.innerHTML += `<div class="d-flex justify-content-start mb-4">
+                    <div class="img_cont_msg">
+                        {% if target_user.profile.image %}
+                        <img src="{{target_user.profile.image.url}}" class="rounded-circle user_img_msg">
+                        {% else %}
+                        <img src="{% static 'images/default-profile.png' %}" class="rounded-circle user_img_msg">
+                        {% endif %}
+                    </div>
+                    <div class="msg_cotainer">
+                        ${message['text']}
+                        <span class="msg_time">8:40 AM, Today</span>
+                    </div>
+                </div>`;
+            }
+            chat_body.scrollTop = chat_body.scrollHeight;
+            text.value = "";
+            text.focus();
+    }
+
+    socket.onclose = function (e){
+        console.log('websocket connection closed.');
+    }
+    
+    document.getElementById("submit_new_message").onclick = function (e){
+
+        socket.send(JSON.stringify({'text': text.value}));
+        chat_body.scrollTop = chat_body.scrollHeight;
+        text.value = "";
+        text.focus();
+    }
 </script>
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('#action_menu_btn').click(function () {
-            $('.action_menu').toggle();
-        });
-    });	</script>
 {% endblock %}

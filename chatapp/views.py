@@ -3,15 +3,16 @@ from django.views import View, generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import PrivateChat, PrivateMessage
 from user.models import User
+from django.db.models import Q
 
 
 class ChatView(LoginRequiredMixin, View):
-    template_name = 'chat/base.html'
+    template_name = 'chat/chat.html'
 
     def setup(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             self.context = {
-                'private_chats': PrivateChat.objects.filter(user1=request.user),
+                'private_chats': PrivateChat.objects.filter(Q(user1=request.user) | Q(user2=request.user)),
             }
         else:
             self.context = {}
@@ -40,11 +41,11 @@ class PrivateChateView(LoginRequiredMixin, generic.ListView):
     context_object_name = 'messages'
     
     def get_queryset(self):
-        chat = get_object_or_404(PrivateChat, user1__username=self.request.user.username, user2__username=self.kwargs['username'])
+        chat = get_object_or_404(PrivateChat.objects.filter(Q(user1=self.request.user, user2__username=self.kwargs['username'])|Q(user1__username=self.kwargs['username'], user2=self.request.user)))
         return PrivateMessage.objects.filter(chat=chat)
     
     def get_context_data(self):
         context = super().get_context_data()
-        context['private_chats'] = PrivateChat.objects.filter(user1=self.request.user, user2__username=self.kwargs['username'])
+        context['private_chats'] = PrivateChat.objects.filter(Q(user1=self.request.user) | Q(user2=self.request.user))
         context['target_user'] = User.objects.get(username=self.kwargs['username'])
         return context

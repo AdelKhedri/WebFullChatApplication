@@ -14,6 +14,7 @@ class PrivateChat(models.Model):
 class PrivateMessage(models.Model):
     text = models.CharField(max_length=1000, verbose_name='متن')
     sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sender', verbose_name='ارسال کننده')
+    receiver = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='receiver', verbose_name='دریافت کننده')
     chat = models.ForeignKey(PrivateChat, on_delete=models.CASCADE, related_name='chat', verbose_name='چت')
     date_time = models.DateTimeField(auto_now_add=True, verbose_name='زمان ارسال')
 
