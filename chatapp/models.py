@@ -36,6 +36,25 @@ class GroupChat(models.Model):
     class Meta:
         ordering = ['created_time', 'name']
     
+    def has_image(self):
+        return True if self.image else False
+    has_image.boolean = True
+    has_image.short_description = 'دارای عکس'
+
+    def get_all_members(self) -> dict:
+        res = self.members.all()
+        dict_ob = {}
+        for user in res:
+            dict_ob.update({
+                user.username: {
+                    'username': user.username,
+                    'phone_number': user.phone_number,
+                    'image':  user.profile.image.url if user.profile and user.profile.image else None
+                }
+            })
+        return dict_ob
+                
+    
     def __str__(self):
         return self.name
 
@@ -51,7 +70,7 @@ class GroupMessage(models.Model):
     message_type = models.TextField(choices=ChoiceMessageType.choices, verbose_name='نوع پیام')
     text = models.CharField(blank=True, max_length=500, verbose_name='متن پیام')
     sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sender_group', verbose_name='ارسال کننده')
-    receiver = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='receiver_group', verbose_name='ارسال کننده')
+    receiver = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='receiver_group', verbose_name='دریافت کننده')
     send_time = models.DateTimeField(auto_now_add=True, verbose_name='زمان ارسال پیام')
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='groupchat', verbose_name='گروه')
     

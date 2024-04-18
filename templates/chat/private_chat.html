@@ -170,7 +170,7 @@
 
     text.focus();
     var socket = new WebSocket(
-        'ws://' + window.location.host + '/ws/chat/?username={{target_user.username}}'
+        'ws://' + window.location.host + '/ws/privatechat/?username={{target_user.username}}'
     );
     var default_msg = {{messages.count}}
     socket.onmessage = function(e) {
