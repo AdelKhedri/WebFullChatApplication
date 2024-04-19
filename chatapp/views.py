@@ -62,29 +62,47 @@ class PrivateChateView(LoginRequiredMixin, generic.ListView):
         return context
 
 
-class GroupChatView(LoginRequiredMixin, generic.ListView):
+class GroupChatView(LoginRequiredMixin, View):
     template_name = 'chat/group_chat.html'
     context_object_name = 'messages'
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             self.all_groups = GroupChat.objects.prefetch_related('members')
-            self.joined_groups = self.all_groups.filter(members=request.user)
             self.group = get_object_or_404(self.all_groups, address=kwargs['address'])
-
+            private_chats = PrivateChat.objects.select_related('user1', 'user2').filter(Q(user1=self.request.user) | Q(user2=self.request.user))
+            self.joined_groups = self.all_groups.filter(members=request.user)
+            message = GroupMessage.objects.select_related('chat').filter(chat=self.group)
+            self.contex = {
+                'private_chats': private_chats,
+                'group_chats': self.joined_groups,
+                'group': self.group,
+                'messages': message,
+            }
             if request.user not in self.group.members.all():
                 return redirect(reverse('chat:request-join') + '?gr=' + kwargs['address'])
         return super().dispatch(request, *args, **kwargs)
     
-    def get_queryset(self):
-        return GroupMessage.objects.filter(chat=self.group)
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, self.contex)
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['private_chats'] = PrivateChat.objects.select_related('user1', 'user2').filter(Q(user1=self.request.user) | Q(user2=self.request.user))
-        context['group_chats'] = self.joined_groups
-        context['group'] = self.group
-        return context
+    def post(self, request, *args, **kwargs):
+        left_group = request.POST.get('left_group', None)
+        if left_group:
+            if request.user in self.group.members.all():
+                if self.group.manager == request.user:
+                    self.group.delete()
+                else:
+                    self.group.members.remove(request.user)
+                    chat = {
+                        'address': self.group.address,
+                        'id': self.group.id,
+                        'can_send_message': self.group.can_send_message
+                    }
+                    channel_layer = get_channel_layer()
+                    async_to_sync(send_message_group)(chat, channel_layer, 'left', sender=request.user.username)
+                    GroupMessage.objects.create(message_type='left', sender=request.user, chat=self.group)
+        return redirect("chat:main")
 
 
 class JoinView(LoginRequiredMixin, View):
@@ -116,7 +134,6 @@ class JoinView(LoginRequiredMixin, View):
                 self.group.members.add(request.user)
                 channel_layer = get_channel_layer()
                 chat = {
-                    'members': self.group.get_all_members(),
                     'address': self.group.address,
                     'id': self.group.id,
                     'can_send_message': self.group.can_send_message

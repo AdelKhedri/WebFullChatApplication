@@ -8,11 +8,11 @@
                     <div class="row">
                         <div class="col-md-3"></div>
                         <div class="col-md-6">
-                            <div class="">
+                            <div>
                                 {% if group.image %}
-                                    <img src="{{group.image.url}}" class="rounded-circle">
+                                    <img src="{{group.image.url}}" style="width: 200px;height: 200px;" class="rounded-circle">
                                 {% else %}
-                                    <img src="{% static 'images/default-profile.png' %}" class="rounded-circle">
+                                    <img src="{% static 'images/default-profile.png' %}" style="max-width: 200px;max-height: 200px;" class="rounded-circle">
                                 {% endif %}
                             </div>
                         </div>
