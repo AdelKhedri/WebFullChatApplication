@@ -15,7 +15,7 @@
         <a href="#" class="text-danger" style="text-decoration: none;" onclick="OpenProfile()">
             <div class="user_info">
                 <span>{{group.name|default:'NOT NAME'}}</span>
-                <p style="margin-bottom: 0px;"><span>اعضا: {{group.members.count}}</span></p>
+                <p style="margin-bottom: 0px;"><span>اعضا: <span id="member-count">{{group.members.count}}</span></span></p>
                 <p style="margin-bottom: 0px;"><span id="message-count">{{messages.count}}</span> <span>پیام</span></p>
             </div>
         </a>
@@ -24,7 +24,19 @@
     <div class="action_menu">
         <ul>
             <li onclick="OpenProfile()"><i class="fas fa-user-circle"></i> View profile</li>
-            <li><i class="fas fa-plus"></i><a href="leave">Leave Group</a></li>
+            <li><i class="fas fa-plus"></i>
+                <form action="" id="form-left-group" method="post">
+                    {% csrf_token %}
+                    <p id="subnit-left-group-form" onclick="submit_elft_group_form()">خروج از گروه</p>
+                    <input type="hidden" name="left_group" value="yes">
+                </form>
+                    <script>
+                        var btn = document.getElementById('submit-left-group-form');
+                        function submit_elft_group_form(){
+                            document.getElementById('form-left-group').submit();
+                        }
+                    </script>
+            </li>
             <li><i class="fas fa-plus"></i> Add to group</li>
             <li><i class="fas fa-users"></i> Add to close friends</li>
             <li><i class="fas fa-ban"></i> Block</li>
@@ -186,7 +198,7 @@
         var text = document.getElementById('new-message');
         var form = document.getElementById('form-send-message');
         var my_username = '{{request.user.username}}'
-        var member_count = document.getElementById('member_count');
+        var member_count = document.getElementById('member-count');
         var message_count = document.getElementById('message-count');
     
         chat_body.scrollTop = chat_body.scrollHeight;
@@ -194,11 +206,12 @@
         var socket = new WebSocket(
             'ws://' + window.location.host + '/ws/groupchat/?address={{group.address}}'
         );
-        var default_msg = {{messages.count}}
+        var default_member_count = {{group.members.count}}
+        var default_msg_count = {{messages.count}}
         socket.onmessage = function(e) {
             var message = JSON.parse(e.data);
 
-            message_count.innerHTML = ++default_msg;
+            message_count.innerHTML = ++default_msg_count;
             switch (message['type'] ){
                 case 'msg':
                     if (message['sender'] === my_username){
@@ -241,11 +254,21 @@
                     break;
                 
                 case 'join':
+                    member_count.innerHTML = ++default_member_count;
                     chat_body.innerHTML += `<div class="d-flex justify-content-center mb-4">
                                                 <div class="msg_cotainer_send bg-success text-dack">
                                                     ${message['sender']} به گروه پیوست
                                                 </div>
-                                            </div>`
+                                            </div>`;
+                    break;
+                
+                case 'left':
+                    chat_body.innerHTML += `<div class="d-flex justify-content-center mb-4">
+                                                <div class="msg_cotainer_send bg-warning text-dack">
+                                                    ${message['sender']} از گروه خارج شد
+                                                </div>
+                                            </div>`;
+                    member_count.innerHTML = --default_member_count;
                     break;
                 default:
                     break
