@@ -323,14 +323,20 @@
                         {% endif %}
                         <div class="chat-type">
                             <ul class="nav nav-tabs">
-                                <li class="nav-item" id="private-chat-btn" onclick="show_tab('private-chat-btn')">
-                                    <span class="nav-link active">چت شخصی</span>
+                                <li class="nav-item position-relative" >
+                                    <button class="btn position-relative" style="margin-left: 3px;" id="private-chat-btn" onclick="show_tab('private-chat-btn')">
+                                        چت شخصی<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning" id="privates-count"></span>
+                                    </button>
                                 </li>
-                                <li class="nav-item" id="group-chat-btn" onclick="show_tab('group-chat-btn')">
-                                    <span class="nav-link">گروه ها</span>
+                                <li class="nav-item" >
+                                    <button class="btn position-relative" style="margin-left: 3px;" id="group-chat-btn" onclick="show_tab('group-chat-btn')">
+                                        گروه ها<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning" id="groups-count"></span>
+                                    </button>
                                 </li>
-                                <li class="nav-item" id="channels-btn" onclick="show_tab('channels-btn')">
-                                    <span class="nav-link">کانال ها</span>
+                                <li class="nav-item" >
+                                    <button class="btn position-relative" style="margin-left: 3px;" id="channels-btn" onclick="show_tab('channels-btn')">
+                                        کانال ها<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning" id="channels-count"></span>
+                                    </button>
                                 </li>
                             </ul>
                         </div>
@@ -439,6 +445,11 @@
                             var group_tab = document.getElementById('group-tab').style;
                             var channels_tab = document.getElementById('channels-tab').style;
 
+                            var privates_count = document.getElementById('privates-count');
+                            var groups_count = document.getElementById('groups-count');
+                            var channels_count = document.getElementById('channels-count');
+                            
+                            
                             function show_tab(tab){
                                 if (tab === 'private-chat-btn'){
                                     private_tab.display = 'block';

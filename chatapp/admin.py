@@ -16,7 +16,19 @@ class PrivateMessageRegistration(admin.ModelAdmin):
     ordering = ['date_time', 'chat', 'sender']
 
 
+class GroupChatRegistration(admin.ModelAdmin):
+    list_display = ['name', 'has_image', 'can_send_message', 'can_see_members', 'created_time']
+    search_fields = ['name', 'address', 'description']
+    list_filter = ['can_send_message', 'can_see_members']
+    
+
+class GroupMessageRegistration(admin.ModelAdmin):
+    list_display = ['message_type', 'sender', 'receiver', 'chat', 'send_time']
+    search_fields = ['sender', 'receiver']
+    list_filter = ['message_type']
+
+
 admin.site.register(PrivateChat, PrivateChatRegistration)
 admin.site.register(PrivateMessage, PrivateMessageRegistration)
-admin.site.register(GroupChat)
-admin.site.register(GroupMessage)
+admin.site.register(GroupChat, GroupChatRegistration)
+admin.site.register(GroupMessage, GroupMessageRegistration)

@@ -4,7 +4,7 @@ from channels.exceptions import StopConsumer
 from channels.db import database_sync_to_async
 from django.db.models import Q
 from user.models import User
-from chatapp.models import PrivateChat, PrivateMessage
+from chatapp.models import PrivateChat, PrivateMessage, GroupChat, GroupMessage
 from urllib.parse import parse_qs
 import json
 from asgiref.sync import sync_to_async
@@ -56,7 +56,7 @@ class PrivateChatsConsumer(AsyncConsumer):
         if text_date:
             text_loaded = json.loads(text_date['text'])
             message = text_loaded['text']
-            print(datetime.now())
+
             await self.channel_layer.group_send(
                 f'private_chat_{self.private_chat[0]}_{self.private_chat[1]}',
                 {
@@ -88,3 +88,71 @@ class PrivateChatsConsumer(AsyncConsumer):
         chat = PrivateChat.objects.get(id=self.private_chat[2])
         target_user = User.objects.get(username=self.target_username)
         PrivateMessage.objects.create(sender=self.scope['user'], receiver=target_user, chat=chat, text=message)
+
+
+async def send_message_group(chat, channel_layer, message_type, message=None, sender=None, receiver=None):
+    await channel_layer.group_send(
+        f"group_chat_{chat['address']}",
+        {
+            'type': 'sendMessageGroup',
+            'message': json.dumps({'type': message_type, 'text': message, 'sender': sender, 'receiver': receiver, 'chat': chat, 'send_time': datetime.now()}, cls=DateTimeJsonEncoder)
+        }
+    )
+
+
+class GroupChatConsumer(AsyncConsumer):
+    async def websocket_connect(self, event):
+        group_address = parse_qs(self.scope['query_string'].decode('utf8'))['address'][0]
+        self.chat = await self.get_group_chat(group_address)
+        self.user = self.scope['user']
+        self.group_address = f"group_chat_{self.chat['address']}"
+
+        if self.user.username in self.chat['members'].keys():
+            await self.send({
+                'type': 'websocket.accept'
+            })
+            await self.channel_layer.group_add(
+                self.group_address,
+                self.channel_name
+            )
+        else:
+            await self.send({
+                'type': 'websocket.close'
+            })
+
+    async def websocket_disconnect(self, message):
+        await self.send({
+            'type': 'websocket.close'
+        })
+        raise StopConsumer()
+
+    async def websocket_receive(self, text_data = None, bytes_data=None):
+        if text_data:
+            text_data_loaded = json.loads(text_data['text'])
+            if text_data_loaded['type'] == 'msg':
+                await self.save_message_in_db(text_data_loaded['type'], self.chat['id'], text_data_loaded['message'], self.user.username)
+                await send_message_group(self.chat, self.channel_layer, text_data_loaded['type'], text_data_loaded['message'], self.user.username)
+
+    @database_sync_to_async
+    def save_message_in_db(self, message_type, group_id, message=None, sender=None, receiver=None):
+        GroupMessage.objects.create(message_type=message_type, text=message, sender=self.user, chat_id=group_id)
+    
+    @database_sync_to_async    
+    def get_group_chat(self, group_address):
+        try:
+            g = GroupChat.objects.get(address=group_address)
+            chat = {
+                'members': g.get_all_members(),
+                'address': g.address,
+                'id': g.id,
+                'can_send_message': g.can_send_message
+            }
+            return chat
+        except GroupChat.DoesNotExist:
+            return None
+    
+    async def sendMessageGroup(self, event):
+        await self.send({
+            'type': 'websocket.send',
+            'text': event['message']
+        })
