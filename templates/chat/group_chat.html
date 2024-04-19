@@ -23,8 +23,8 @@
     <span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
     <div class="action_menu">
         <ul>
-            <li onclick="OpenProfile()"><i class="fas fa-user-circle"></i> View profile</li>
-            <li><i class="fas fa-plus"></i>
+            <li onclick="OpenProfile()"><i class="fas fa-user-circle"></i>نمایش پروفایل</li>
+            <li>
                 <form action="" id="form-left-group" method="post">
                     {% csrf_token %}
                     <p id="subnit-left-group-form" onclick="submit_elft_group_form()">خروج از گروه</p>
@@ -37,7 +37,9 @@
                         }
                     </script>
             </li>
-            <li><i class="fas fa-plus"></i> Add to group</li>
+            {% if group.manager == request.user %}
+                <li><a style="text-decoration: none; color: white;" href="update/">اپدیت گروه</a></li>
+            {% endif %}
             <li><i class="fas fa-users"></i> Add to close friends</li>
             <li><i class="fas fa-ban"></i> Block</li>
         </ul>
@@ -145,14 +147,14 @@
 
 
 <div class="card-footer" id="chat-footer">
-    <div class="input-group">
+    <div id="message-box" class="input-group">
         <div class="input-group-append">
             <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
         </div>
         <textarea name="new-message" id="new-message" class="form-control type_msg"
             placeholder="Type your message..."></textarea>
         <div id="submit_new_message" class="input-group-append">
-            <span onclick="" class="input-group-text send_btn"><i
+            <span onclick="addText(this)"  class="input-group-text send_btn"><i
                     class="fas fa-location-arrow"></i></span>
         </div>
     </div>
@@ -173,7 +175,16 @@
         var chat_foter = document.getElementById('chat-footer');
         var chat_profile = document.getElementById('chat-profile');
         var profile_counter = 1;
-    
+        var text_message = ''
+        function addText(self) {
+            var parentDiv = self.parentNode.parentNode;
+            var textarea = parentDiv.querySelector('textarea');
+            text_message = textarea;
+            socket.send(JSON.stringify({'message': text.value, 'type': 'msg', 'sender': my_username}));
+            chat_body.scrollTop = chat_body.scrollHeight;
+            text.value = "";
+            text.focus();
+        }
         function OpenProfile() {
     
             profile_counter += 1;
@@ -200,9 +211,11 @@
         var my_username = '{{request.user.username}}'
         var member_count = document.getElementById('member-count');
         var message_count = document.getElementById('message-count');
-    
+        
+        var input_box = document.getElementById('message-box');
+
         chat_body.scrollTop = chat_body.scrollHeight;
-        text.focus();
+        
         var socket = new WebSocket(
             'ws://' + window.location.host + '/ws/groupchat/?address={{group.address}}'
         );
@@ -212,6 +225,7 @@
             var message = JSON.parse(e.data);
 
             message_count.innerHTML = ++default_msg_count;
+
             switch (message['type'] ){
                 case 'msg':
                     if (message['sender'] === my_username){
@@ -270,21 +284,34 @@
                                             </div>`;
                     member_count.innerHTML = --default_member_count;
                     break;
+                
+                case 'update':
+                    console.log(message['chat']['can_send_message'])
+                    if (message['chat']['can_send_message'] == false){
+                        input_box.innerHTML = '';
+                    } else {
+                        input_box.innerHTML = `<div class="input-group-append">
+                            <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
+                            </div>
+                            <textarea name="new-message" id="new-message" class="form-control type_msg"
+                            placeholder="Type your message..."></textarea>
+                            <div id="submit_new_message" class="input-group-append">
+                                <span onclick="addText(this)" class="input-group-text send_btn"><i
+                                    class="fas fa-location-arrow"></i></span>
+                                    </div>`;
+                        text = document.getElementById('new-message');
+                    }
+                    break;
                 default:
                     break
-                }
+            }
+            text = document.getElementById('new-message');
+            
         }
-    
+        text.focus();
+
         socket.onclose = function (e){
             console.log('websocket connection closed.');
-        }
-        
-        document.getElementById("submit_new_message").onclick = function (e){
-    
-            socket.send(JSON.stringify({'message': text.value, 'type': 'msg', 'sender': my_username}));
-            chat_body.scrollTop = chat_body.scrollHeight;
-            text.value = "";
-            text.focus();
         }
     </script>
 {% endblock %}

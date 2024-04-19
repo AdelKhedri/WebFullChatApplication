@@ -91,13 +91,14 @@ class PrivateChatsConsumer(AsyncConsumer):
 
 
 async def send_message_group(chat, channel_layer, message_type, message=None, sender=None, receiver=None):
-    await channel_layer.group_send(
-        f"group_chat_{chat['address']}",
-        {
-            'type': 'sendMessageGroup',
-            'message': json.dumps({'type': message_type, 'text': message, 'sender': sender, 'receiver': receiver, 'chat': chat, 'send_time': datetime.now()}, cls=DateTimeJsonEncoder)
-        }
-    )
+    if message_type == 'update' or chat['can_send_message'] == True or sender == chat['manager']:
+        await channel_layer.group_send(
+            f"group_chat_{chat['address']}",
+            {
+                'type': 'sendMessageGroup',
+                'message': json.dumps({'type': message_type, 'text': message, 'sender': sender, 'receiver': receiver, 'chat': chat, 'send_time': datetime.now()}, cls=DateTimeJsonEncoder)
+            }
+        )
 
 
 class GroupChatConsumer(AsyncConsumer):
@@ -144,8 +145,9 @@ class GroupChatConsumer(AsyncConsumer):
             chat = {
                 'members': g.get_all_members(),
                 'address': g.address,
+                'manager': g.manager.username,
                 'id': g.id,
-                'can_send_message': g.can_send_message
+                'can_send_message': g.can_send_message,
             }
             return chat
         except GroupChat.DoesNotExist:

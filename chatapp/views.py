@@ -8,6 +8,7 @@ from django.db.models import Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from websocket.consumers import send_message_group
+from .forms import GroupChatUpdateFrom
 
 
 class ChatView(LoginRequiredMixin, View):
@@ -103,6 +104,32 @@ class GroupChatView(LoginRequiredMixin, View):
                     async_to_sync(send_message_group)(chat, channel_layer, 'left', sender=request.user.username)
                     GroupMessage.objects.create(message_type='left', sender=request.user, chat=self.group)
         return redirect("chat:main")
+
+
+class GroupUpdateView(LoginRequiredMixin, generic.UpdateView):
+    template_name = 'chat/group_update.html'
+    form_class = GroupChatUpdateFrom
+    model = GroupChat
+
+    def get_success_url(self):
+        return '/chat/group/' + self.kwargs['address'] + '/'
+    
+    def form_valid(self, form):
+        can_send_message = form['can_send_message'].data
+        can_see_members = form['can_see_members'].data
+        channel_layer = get_channel_layer()
+        chat = {
+            'address': self.kwargs['address'],
+            'can_send_message': can_send_message,
+            'can_see_members': can_see_members,
+            'manager': self.group.manager.username
+        }
+        async_to_sync(send_message_group)(chat, channel_layer, 'update')
+        return super().form_valid(form)
+    
+    def get_object(self, queryset=None):
+        self.group = GroupChat.objects.get(address=self.kwargs['address'])
+        return self.group
 
 
 class JoinView(LoginRequiredMixin, View):

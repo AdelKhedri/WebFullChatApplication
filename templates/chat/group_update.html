@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" >
+    <title>Document</title>
+</head>
+<body dir="rtl">
+    <div class="container">
+       <div class="row mt-4">
+       </div>
+       <div class="row">
+            <div class="col">
+                <div class="card p-3" style="height: 100vh;background-color: rgb(143, 154, 164);">
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        <label class="form-label" for="id">نام گروه</label>
+                        {{form.name}}
+                        <label class="form-label" for="id">درباره گروه</label>
+                        {{form.description}}
+                        <div class="row">
+                            <div class="col">
+                                <label class="form-label" for="id">عکس گروه</label>
+                                {{form.image}}
+                            </div>
+                            <div class="col">
+                                <label class="form-label" for="id">نمایش عکس فعلی گروه</label>
+                                {% if form.image.initial %}
+                                <img src="/media/{{form.image.initial}}" class="img-thumbnail" alt="no" srcset="">
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-check d-flex" >
+                                <label class="form-check-label ms-1" for="">امکان ارسال پیام</label>
+                                {{form.can_send_message}}
+                            </div>
+                            <div class="form-check d-flex">
+                                <label class="form-check-label ms-1" for="">امکان دیدن عضو ها</label>
+                                {{form.can_see_members}}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success mt-2">آپدیت</button>
+                        <button type="reset" class="btn btn-danger mt-2">پاک کردن</button>
+                    </form>
+
+                </div>
+            </div>
+       </div>
+    </div>
+</body>
+</html>
