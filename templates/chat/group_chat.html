@@ -128,12 +128,15 @@
         <div class="row">
             <div class="col">
                 <div class="card p-4 text-white" style="height: auto;">
-                    <p>name: {{group.name|default:'NOT NAME'}}</p>
+                    <p>نام گروه: {{group.name|default:'NOT NAME'}}</p>
                     <p class="text-mouted">
                         username: <input type="text" disabled placeholder="http://127.0.0.1:8000/chat/u/{{target_user.username}}/">
                         <button class="btn btn-warning"
                             onclick="navigator.clipboard.writeText('http://127.0.0.1:8000/chat/u/{{target_user.username}}')">copy</button>
                     </p>
+                    <p>درباره گروه {{group.description|default:'چیزی درباره این گروه وجود ندارد'}}</p>
+                    <p>تعداد اعضا: {{group.members.count}}</p>
+                    <p>مدیر: {{group.manager.get_full_name|default:group.manager.username}}</p>
                 </div>
             </div>
 

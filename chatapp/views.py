@@ -128,7 +128,7 @@ class GroupUpdateView(LoginRequiredMixin, generic.UpdateView):
         return super().form_valid(form)
     
     def get_object(self, queryset=None):
-        self.group = GroupChat.objects.get(address=self.kwargs['address'])
+        self.group = get_object_or_404(GroupChat, address=self.kwargs['address'], manager=self.request.user)
         return self.group
 
 
