@@ -8,14 +8,15 @@
             {% if group.image %}
             <img src="{{group.image.url}}" class="rounded-circle user_img_msg">
             {% else %}
-            <img src="{% static 'images/default-group-chat.png' %}" class="rounded-circle user_img_msg">
+            <img src="{% static 'images/default-group-image.png' %}" class="rounded-circle user_img_msg">
             {% endif %}
             <span class="online_icon"></span>
         </div>
         <a href="#" class="text-danger" style="text-decoration: none;" onclick="OpenProfile()">
             <div class="user_info">
                 <span>{{group.name|default:'NOT NAME'}}</span>
-                <p><span id="message-count">{{messages.count}}</span> <span>پیام</span></p>
+                <p style="margin-bottom: 0px;"><span>اعضا: {{group.members.count}}</span></p>
+                <p style="margin-bottom: 0px;"><span id="message-count">{{messages.count}}</span> <span>پیام</span></p>
             </div>
         </a>
     </div>
@@ -36,7 +37,7 @@
         {% for msg in messages %}
             {% if msg.get_message_type_display == 'join' %}
                 <div class="d-flex justify-content-center mb-4">
-                    <div class="msg_cotainer_send bg-warning text-dack">
+                    <div class="msg_cotainer_send bg-success text-dack">
                         {{msg.sender}} عضو گروه شد.
                     </div>
                 </div>
@@ -188,6 +189,7 @@
         var member_count = document.getElementById('member_count');
         var message_count = document.getElementById('message-count');
     
+        chat_body.scrollTop = chat_body.scrollHeight;
         text.focus();
         var socket = new WebSocket(
             'ws://' + window.location.host + '/ws/groupchat/?address={{group.address}}'
@@ -195,44 +197,59 @@
         var default_msg = {{messages.count}}
         socket.onmessage = function(e) {
             var message = JSON.parse(e.data);
+
             message_count.innerHTML = ++default_msg;
-            if (message['type'] === 'msg'){
-                console.log(message['type'])
-                if (message['sender'] === my_username){
-                audio_send.play();
-                chat_body.innerHTML += `<div class="d-flex justify-content-end mb-4">
-                            <div class="msg_cotainer_send">
-                                ${message['text']}
-                                <span class="msg_time_send">${message['send_time']}, Today</span>
-                            </div>
+            switch (message['type'] ){
+                case 'msg':
+                    if (message['sender'] === my_username){
+                        audio_send.play();
+                        chat_body.innerHTML += `<div class="d-flex justify-content-end mb-4">
+                                    <div class="msg_cotainer_send">
+                                        ${message['text']}
+                                        <span class="msg_time_send">${message['send_time']}, Today</span>
+                                    </div>
+                                    <div class="img_cont_msg">
+                                        {% if request.user.profile.image %}
+                                        <img src="{{request.user.profile.image.url}}" class="rounded-circle user_img_msg">
+                                        {% else %}
+                                        <img src="{% static 'images/default-profile.png' %}" class="rounded-circle user_img_msg">
+                                        {% endif %}
+                                    </div>
+                                </div>`;
+                    }else {
+                        audio_receive.play();
+                        chat_body.innerHTML += `<div class="d-flex justify-content-start mb-4">
                             <div class="img_cont_msg">
-                                {% if request.user.profile.image %}
-                                <img src="{{request.user.profile.image.url}}" class="rounded-circle user_img_msg">
+                                {% if target_user.profile.image %}
+                                <img src="{{target_user.profile.image.url}}" class="rounded-circle user_img_msg">
                                 {% else %}
                                 <img src="{% static 'images/default-profile.png' %}" class="rounded-circle user_img_msg">
                                 {% endif %}
                             </div>
+                            <div class="msg_cotainer">
+                                <div>
+                                    <small class="text-danger" style="font-weight: bold;">${message['sender']}:</small>
+                                </div>
+                                ${message['text']}
+                                <span class="msg_time">8:40 AM, Today</span>
+                            </div>
                         </div>`;
-                }else {
-                    audio_receive.play();
-                    chat_body.innerHTML += `<div class="d-flex justify-content-start mb-4">
-                        <div class="img_cont_msg">
-                            {% if target_user.profile.image %}
-                            <img src="{{target_user.profile.image.url}}" class="rounded-circle user_img_msg">
-                            {% else %}
-                            <img src="{% static 'images/default-profile.png' %}" class="rounded-circle user_img_msg">
-                            {% endif %}
-                        </div>
-                        <div class="msg_cotainer">
-                            ${message['text']}
-                            <span class="msg_time">8:40 AM, Today</span>
-                        </div>
-                    </div>`;
+                    }
+                    chat_body.scrollTop = chat_body.scrollHeight;
+                    text.value = "";
+                    text.focus();
+                    break;
+                
+                case 'join':
+                    chat_body.innerHTML += `<div class="d-flex justify-content-center mb-4">
+                                                <div class="msg_cotainer_send bg-success text-dack">
+                                                    ${message['sender']} به گروه پیوست
+                                                </div>
+                                            </div>`
+                    break;
+                default:
+                    break
                 }
-                chat_body.scrollTop = chat_body.scrollHeight;
-                text.value = "";
-                text.focus();
-            }
         }
     
         socket.onclose = function (e){

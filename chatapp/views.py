@@ -1,9 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.views import View, generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import PrivateChat, PrivateMessage, GroupChat, GroupMessage
 from user.models import User
 from django.db.models import Q
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from websocket.consumers import send_message_group
 
 
 class ChatView(LoginRequiredMixin, View):
@@ -38,7 +42,7 @@ class ChatView(LoginRequiredMixin, View):
             new_group.save()
             new_group.members.add(request.user)
             new_group.save()
-            redirect('chat:main')
+            redirect('chat:group-chat', address=new_group.address)
         return render(request, self.template_name, self.context)
 
 
@@ -62,14 +66,62 @@ class GroupChatView(LoginRequiredMixin, generic.ListView):
     template_name = 'chat/group_chat.html'
     context_object_name = 'messages'
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            self.all_groups = GroupChat.objects.prefetch_related('members')
+            self.joined_groups = self.all_groups.filter(members=request.user)
+            self.group = get_object_or_404(self.all_groups, address=kwargs['address'])
+
+            if request.user not in self.group.members.all():
+                return redirect(reverse('chat:request-join') + '?gr=' + kwargs['address'])
+        return super().dispatch(request, *args, **kwargs)
+    
     def get_queryset(self):
-        self.all_groups = GroupChat.objects.prefetch_related('members').filter(members=self.request.user)
-        self.group = get_object_or_404(self.all_groups, Q(address=self.kwargs['address']) & Q(members=self.request.user))
         return GroupMessage.objects.filter(chat=self.group)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['private_chats'] = PrivateChat.objects.select_related('user1', 'user2').filter(Q(user1=self.request.user) | Q(user2=self.request.user))
-        context['group_chats'] = self.all_groups
+        context['group_chats'] = self.joined_groups
         context['group'] = self.group
         return context
+
+
+class JoinView(LoginRequiredMixin, View):
+    template_name = 'chat/join_chat.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            group_address = request.GET.get('gr', None)
+            if group_address:
+                self.group = get_object_or_404(GroupChat.objects.prefetch_related('members'), address=group_address)
+                if request.user not in self.group.members.all():
+                    self.context = {
+                        'group': self.group,
+                    }
+                else:
+                    return redirect('chat:group-chat', address = self.group.address)
+            else:
+                self.context = {}
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request, *arg, **kwargs):
+        return render(request, self.template_name, self.context)
+
+    def post(self, request, *args, **kwargs):
+        request_joined_group = request.POST.get('group_join', None)
+
+        if request_joined_group:
+            if request.user not in self.group.members.all():
+                self.group.members.add(request.user)
+                channel_layer = get_channel_layer()
+                chat = {
+                    'members': self.group.get_all_members(),
+                    'address': self.group.address,
+                    'id': self.group.id,
+                    'can_send_message': self.group.can_send_message
+                }
+                async_to_sync(send_message_group)(chat, channel_layer,'join', sender=request.user.username )
+                GroupMessage.objects.create(message_type='join', sender=request.user, chat=self.group)
+            return redirect('chat:group-chat', address=self.group.address)
+        return render(request, self.template_name, {})

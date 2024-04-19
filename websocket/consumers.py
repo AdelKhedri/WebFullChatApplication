@@ -90,12 +90,12 @@ class PrivateChatsConsumer(AsyncConsumer):
         PrivateMessage.objects.create(sender=self.scope['user'], receiver=target_user, chat=chat, text=message)
 
 
-async def send_message_group(self, message_type, message, sender=None, receiver=None):
-    await self.channel_layer.group_send(
-        self.group_address,
+async def send_message_group(chat, channel_layer, message_type, message=None, sender=None, receiver=None):
+    await channel_layer.group_send(
+        f"group_chat_{chat['address']}",
         {
             'type': 'sendMessageGroup',
-            'message': json.dumps({'type': message_type, 'text': message, 'sender': sender, 'receiver': receiver, 'chat': self.chat, 'send_time': datetime.now()}, cls=DateTimeJsonEncoder)
+            'message': json.dumps({'type': message_type, 'text': message, 'sender': sender, 'receiver': receiver, 'chat': chat, 'send_time': datetime.now()}, cls=DateTimeJsonEncoder)
         }
     )
 
@@ -130,8 +130,9 @@ class GroupChatConsumer(AsyncConsumer):
         if text_data:
             text_data_loaded = json.loads(text_data['text'])
             if text_data_loaded['type'] == 'msg':
-                await self.save_message_in_db(text_data_loaded['type'], self.chat['id'], text_data_loaded['message'], self.user)
-                await send_message_group(self, text_data_loaded['type'], text_data_loaded['message'], self.user.username)
+                await self.save_message_in_db(text_data_loaded['type'], self.chat['id'], text_data_loaded['message'], self.user.username)
+                await send_message_group(self.chat, self.channel_layer, text_data_loaded['type'], text_data_loaded['message'], self.user.username)
+
     @database_sync_to_async
     def save_message_in_db(self, message_type, group_id, message=None, sender=None, receiver=None):
         GroupMessage.objects.create(message_type=message_type, text=message, sender=self.user, chat_id=group_id)

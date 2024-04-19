@@ -1,0 +1,43 @@
+{% extends 'chat/base.html' %}
+{% load static %}
+
+{% block chatpage %}
+        <div class="col">
+            <div class="justify-content-center mb-4 card" style="justify-content: center;">
+                {% if group %}
+                    <div class="row">
+                        <div class="col-md-3"></div>
+                        <div class="col-md-6">
+                            <div class="">
+                                {% if group.image %}
+                                    <img src="{{group.image.url}}" class="rounded-circle">
+                                {% else %}
+                                    <img src="{% static 'images/default-profile.png' %}" class="rounded-circle">
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-3"></div>
+                    </div>
+                    <div class="msg_cotainer text-center" dir="rtl">
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            شما عضو این گروه نیستید. <br>
+                            میخواهید عضو شوید؟
+                            <p>نام گروه: <span class="bg-light p-1 rounded">{{group.name}}</span></p>
+                            <p>اعضا: <span class="bg-light p-1 rounded">{{group.members.count}}</span></p>
+                            {% if group.description %}
+                                <p>درباره گروه</p>
+                                <p class="bg-light p-1 rounded">{{group.description}}</p>
+                            {% else %}
+                                <p class="text-danger">این گروه درمورد خود چیزی ننوشته</p>
+                            {% endif %}
+                            <input type="hidden" name="group_join" value="{{group.address}}">
+                            <div>
+                                <button class=" btn btn-success" type="submit" style="font-weight: bold;">عضو شدن</button>
+                            </div>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+{% endblock %}
