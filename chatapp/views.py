@@ -165,7 +165,7 @@ class JoinView(LoginRequiredMixin, View):
                     'id': self.group.id,
                     'can_send_message': self.group.can_send_message
                 }
-                async_to_sync(send_message_group)(chat, channel_layer,'join', sender=request.user.username )
+                async_to_sync(send_message_group)(chat, channel_layer,'join', sender=request.user.username , sender_name=request.user.get_full_name())
                 GroupMessage.objects.create(message_type='join', sender=request.user, chat=self.group)
             return redirect('chat:group-chat', address=self.group.address)
         return render(request, self.template_name, {})

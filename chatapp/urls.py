@@ -9,5 +9,5 @@ urlpatterns = [
     path('u/<username>/', views.PrivateChateView.as_view(), name='private-chat'),
     path('group/<address>/', views.GroupChatView.as_view(), name='group-chat'),
     path('join/', views.JoinView.as_view(), name='request-join'),
-    path('group/<str:address>/update/', views.GroupUpdateView.as_view(), name='group-update')
+    path('group/<str:address>/update/', views.GroupUpdateView.as_view(), name='group-update'),
 ]
