@@ -344,7 +344,7 @@
                         <ui class="contacts" id="private-tab" style="display: block;">
                             {% if private_chats %}
                             {% for chat in private_chats %}
-                            <li>
+                            <li class="position-relative">
                                 {% if chat.user2 != request.user %}
                                     <a href="/chat/u/{{chat.user2.username}}/" style="text-decoration: none;">
                                         <div class="d-flex bd-highlight">
@@ -355,7 +355,8 @@
                                                 {% else %}
                                                     src="{% static 'images/default-profile.png' %}"
                                                 {% endif %} class="rounded-circle user_img">
-                                                <span class="online_icon"></span>
+                                                <span class="position-absolute buttom-0 start-100 translate-middle badge rounded-pill bg-warning" id="private_image_{{chat.id}}">0</span>
+                                                <!-- <span class="online_icon"></span> -->
                                             </div>
                                             <div class="user_info">
                                                 <span>{{chat.user2.username}}</span>
@@ -373,7 +374,8 @@
                                                 {% else %}
                                                 src="{% static 'images/default-profile.png' %}"
                                                 {% endif %} class="rounded-circle user_img">
-                                                <span class="online_icon"></span>
+                                                <span class="position-absolute buttom-0 start-100 translate-middle badge rounded-pill bg-warning" id="private_image_{{chat.id}}">0</span>
+                                                <!-- <span class="online_icon"></span> -->
                                             </div>
                                             <div class="user_info">
                                                 <span>{{chat.user1.username}}</span>
@@ -391,7 +393,7 @@
                         <ui class="contacts" id="group-tab" style="display: none;">
                             {% if group_chats %}
                             {% for group in group_chats%}
-                            <li>
+                            <li class="position-relative">
                                 <a href="/chat/group/{{group.address}}/" style="text-decoration: none;">
                                     <div class="d-flex bd-highlight">
                                         <div class="img_cont">
@@ -400,7 +402,8 @@
                                             {% else %}
                                             <img src="{% static 'images/default-group-image.png' %}" class="rounded-circle user_img">
                                             {% endif %}
-                                            <span class="online_icon"></span>
+                                            <span class="position-absolute buttom-0 start-100 translate-middle badge rounded-pill bg-warning" id="group_image_{{group.address}}">0</span>
+                                            <!-- <span class="online_icon">/</span> -->
                                         </div>
                                         <div class="user_info">
                                             <span>{{group.name}}</span>
@@ -436,39 +439,7 @@
                             <p class="text-white mx-3">شما هنوز عضو کانالی نشده اید</p>
                             {% endif %}
                         </ui>
-                        <script>
-                            var private_btn = document.getElementById('private-chat-btn').style;
-                            var group_btn = document.getElementById('group-chat-btn').style;
-                            var channels_btn = document.getElementById('channels-btn').style;
-
-                            
-                            var private_tab = document.getElementById('private-tab').style;
-                            var group_tab = document.getElementById('group-tab').style;
-                            var channels_tab = document.getElementById('channels-tab').style;
-
-                            var privates_count = document.getElementById('privates-count');
-                            var groups_count = document.getElementById('groups-count');
-                            var channels_count = document.getElementById('channels-count');
-                            
-                            
-                            function show_tab(tab){
-                                if (tab === 'private-chat-btn'){
-                                    private_tab.display = 'block';
-                                    group_tab.display = 'none';
-                                    channels_tab.display = 'none';
-                                }
-                                if (tab === 'group-chat-btn'){
-                                    private_tab.display = 'none';
-                                    group_tab.display = 'block';
-                                    channels_tab.display = 'none';
-                                }
-                                if (tab === 'channels-btn'){
-                                    private_tab.display = 'none';
-                                    group_tab.display = 'none';
-                                    channels_tab.display = 'block';
-                                }
-                            }
-                        </script>
+                        
                     </div>
                     <div class="card-footer ">
                         <!-- Modal -->
@@ -613,10 +584,87 @@
                     {% endblock %}
                 </div>
             </div>
+            <div id="new-notif">
+                
+            </div>
         </div>
     </div>
+    <script>
+        var private_btn = document.getElementById('private-chat-btn').style;
+        var group_btn = document.getElementById('group-chat-btn').style;
+        var channels_btn = document.getElementById('channels-btn').style;
 
+        
+        var private_tab = document.getElementById('private-tab').style;
+        var group_tab = document.getElementById('group-tab').style;
+        var channels_tab = document.getElementById('channels-tab').style;
 
+        var privates_count = document.getElementById('privates-count');
+        var privates_count_default = 0;
+        var groups_count = document.getElementById('groups-count');
+        var groups_count_default = 0;
+        var channels_count = document.getElementById('channels-count');
+        
+        var new_notif_div = document.getElementById('new-notif');
+        
+        var notif_socket = new WebSocket(
+            'ws://' + window.location.host + '/ws/notification/'
+        );
+
+        notif_socket.onmessage = function (e) {
+            var new_notif = JSON.parse(e.data);
+            
+            switch (new_notif['type']) {
+                case 'private_chat':
+                    privates_count.innerHTML = ++privates_count_default;
+                    var private_message_box = `private_image_${new_notif['id']}`;
+                    document.getElementById(private_message_box).innerHTML = parseInt(document.getElementById(private_message_box).innerHTML) + 1;
+                    new_notif_div.innerHTML = `
+                    <div id="new-notif" class="card" style="max-width: 200px;min-width: 150px;">
+                        <p>${new_notif['sender']}</p>
+                        <p>${new_notif['text']}</p>
+                        <p>${new_notif['send_time']}</p>
+                    </div>`;
+                    break
+                
+                case 'group_chat':
+                    groups_count.innerHTML = ++groups_count_default;
+                    var group_messages_box = `group_image_${new_notif['group']['address']}`;
+                    document.getElementById(group_messages_box).innerHTML = parseInt(document.getElementById(group_messages_box).innerHTML) + 1
+                    new_notif_div.innerHTML = `
+                    <div id="new-notif" class="card" style="max-width: 200px;min-width: 150px;">
+                        <p>${new_notif['group']['address']}</p>
+                        <p>${new_notif['text']}</p>
+                        <p>${new_notif['send_time']}</p>
+                    </div>`;
+                    break
+                
+                default:
+                    break
+            }
+        }
+        notif_socket.onclose = function (e){
+            console.log('websocket connection closed.');
+        }
+        
+        function show_tab(tab){
+            if (tab === 'private-chat-btn'){
+                private_tab.display = 'block';
+                group_tab.display = 'none';
+                channels_tab.display = 'none';
+            }
+            if (tab === 'group-chat-btn'){
+                private_tab.display = 'none';
+                group_tab.display = 'block';
+                channels_tab.display = 'none';
+            }
+            if (tab === 'channels-btn'){
+                private_tab.display = 'none';
+                group_tab.display = 'none';
+                channels_tab.display = 'block';
+            }
+        }
+    </script>
     {% block websocket %}
     {% endblock %}
 </body>

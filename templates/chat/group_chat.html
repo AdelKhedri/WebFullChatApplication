@@ -178,6 +178,7 @@
         var chat_foter = document.getElementById('chat-footer');
         var chat_profile = document.getElementById('chat-profile');
         var profile_counter = 1;
+
         var text_message = ''
         function addText(self) {
             var parentDiv = self.parentNode.parentNode;
@@ -188,6 +189,7 @@
             text.value = "";
             text.focus();
         }
+        
         function OpenProfile() {
     
             profile_counter += 1;
@@ -274,7 +276,7 @@
                     member_count.innerHTML = ++default_member_count;
                     chat_body.innerHTML += `<div class="d-flex justify-content-center mb-4">
                                                 <div class="msg_cotainer_send bg-success text-dack">
-                                                    ${message['sender']} به گروه پیوست
+                                                    ${message['sender_name']} به گروه پیوست
                                                 </div>
                                             </div>`;
                     break;
@@ -282,7 +284,7 @@
                 case 'left':
                     chat_body.innerHTML += `<div class="d-flex justify-content-center mb-4">
                                                 <div class="msg_cotainer_send bg-warning text-dack">
-                                                    ${message['sender']} از گروه خارج شد
+                                                    ${message['sender_name']} از گروه خارج شد
                                                 </div>
                                             </div>`;
                     member_count.innerHTML = --default_member_count;
