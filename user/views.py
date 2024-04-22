@@ -20,7 +20,6 @@ class LoginView(View):
             phone_number = userForm.cleaned_data['phone_number']
             password = userForm.cleaned_data['password']
             user = authenticate(request, phone_number=phone_number, password=password)
-            print(user)
             if user is not None:
                 login(request, user=user)
                 return redirect('chat:main')

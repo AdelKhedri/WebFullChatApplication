@@ -1,11 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 
-# Create your models here.
+# fix circular import error: 
+def phone_number_validator(value):
+    if not value.isnumeric():
+        raise ValidationError(_('شماره تلفن باید عددی باشد'))
+    elif len(value) != 11:
+        raise ValidationError(_('شماره باید 11 رقم باشد'))
 
 
 class User(AbstractUser):
-    phone_number = models.IntegerField(verbose_name='شماره تلفن', unique=True)
+    phone_number = models.CharField(max_length=11,validators=[phone_number_validator] ,verbose_name='شماره تلفن', unique=True)
     REQUIRED_FIELDS = ['username']
     USERNAME_FIELD = 'phone_number'
     
@@ -14,6 +21,16 @@ class User(AbstractUser):
     
     def has_email(self):
         return True if self.email else False
+    
+    def get_profile_image(self) -> str | None:
+        try:
+            profile = Profile.objects.get(id=self.pk)
+            if profile.image:
+                return profile.image.url
+            else:
+                return None
+        except:
+            return None
     
     def __str__(self):
         if self.last_name or self.first_name:

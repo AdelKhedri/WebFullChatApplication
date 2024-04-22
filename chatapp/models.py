@@ -48,8 +48,7 @@ class GroupChat(models.Model):
             dict_ob.update({
                 user.username: {
                     'username': user.username,
-                    'id': user.id,
-                    'image':  user.profile.image.url if user.profile and user.profile.image else None
+                    'id': user.get_profile_image(),
                 }
             })
         return dict_ob
