@@ -319,14 +319,14 @@
             <div class="row justify-content-center">
                 <div class="col-md-8 col-xl-6 chat">
                     <div class="card" style="height: 100vh;">
-                        <form action="" dir="rtl" method="post" class="p-5">
+                        <form action="" dir="rtl" enctype="multipart/form-data" method="post" class="p-5">
                             {% csrf_token %}
                             {% block content %}
                             {% endblock %}
                         </form>
                     </div>
                 </div>
-            </div>from channels.consumer import AsyncConsumer
+            </div>
         </div>
     </body>
 

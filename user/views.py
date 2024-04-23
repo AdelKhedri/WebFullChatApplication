@@ -49,6 +49,10 @@ class SinUpView(View):
 class ChangeProfileView(LoginRequiredMixin, View):
     template_name = 'user/edite_profile.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        user_profile = Profile.objects.get_or_create(user=request.user)
+        return super().dispatch(request, *args, **kwargs)
+
     def get(self, request, *args, **kwargs):
         context = {
             'profile_form': ProfileChangeForm(instance=request.user.profile),
@@ -57,7 +61,7 @@ class ChangeProfileView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        profile_form = ProfileChangeForm(request.FILES,request.POST, instance=request.user.profile)
+        profile_form = ProfileChangeForm(request.POST, request.FILES , instance=request.user.profile)
         user_form = UserChangeForm(request.POST, instance=request.user)
 
         if profile_form.is_valid():

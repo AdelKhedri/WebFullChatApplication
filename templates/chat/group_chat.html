@@ -222,7 +222,8 @@
         chat_body.scrollTop = chat_body.scrollHeight;
         
         var socket = new WebSocket(
-            'ws://' + window.location.host + '/ws/groupchat/?address={{group.address}}'
+            // 'ws://' + window.location.host + '/ws/groupchat/?address={{group.address}}' // used when the project is run with the manage.py runserver.
+            'ws://{{IP_SERVER}}:8001/ws/groupchat/?address={{group.address}}'
         );
         var default_member_count = {{group.members.count}}
         var default_msg_count = {{messages.count}}

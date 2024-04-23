@@ -608,7 +608,8 @@
         var new_notif_div = document.getElementById('new-notif');
         
         var notif_socket = new WebSocket(
-            'ws://' + window.location.host + '/ws/notification/'
+            // 'ws://' + window.location.host + '/ws/notification/' // use for when the project runed with manage.py runserver
+            'ws://{IP_SERVER}:8001/ws/notification/'
         );
 
         notif_socket.onmessage = function (e) {
