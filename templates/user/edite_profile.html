@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col chat">
-            <div class="card" style="height: 100vh;">
+            <div class="card" style="height: auto;">
                 <div id="chat-profile">
                     <div class="card" style="height: auto;">
                         <div class="card-title">
@@ -23,7 +23,7 @@
                         <div class="row">
                             <div class="col">
                                 <form action="" enctype="multipart/form-data" method="post">
-                                    <div class="card p-4 text-white" style="height: auto;">
+                                    <div class="p-4 text-white" style="height: auto;">
                                         <p>کابر</p>
                                         <p class="text-mo   uted">
                                             یوزرنیم: {{user_form.username}}
@@ -66,15 +66,4 @@
         </div>
     </div>
 </div>
-
-<!-- <div class="row">
-    <div class="col">
-        <div class="row">
-            <div class="img_cont">
-                <img src="{{profile.image.url}}" class="rounded-circle user_img" alt="">
-            </div>
-            <input type="image" class="btn btn-warning">
-        </div>
-    </div>
-</div> -->
 {% endblock %}

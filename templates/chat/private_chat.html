@@ -170,8 +170,8 @@
 
     text.focus();
     var socket = new WebSocket(
-        // 'ws://' + window.location.host + '/ws/privatechat/?username={{target_user.username}}' // used when the project is run with the manage.py runserver
-        'ws://{{IP_SERVER}}:8001/ws/privatechat/?username={{target_user.username}}'
+        'ws://' + window.location.host + '/ws/privatechat/?username={{target_user.username}}' // used when the project is run with the manage.py runserver
+        // 'ws://{{IP_SERVER}}:8001/ws/privatechat/?username={{target_user.username}}'
     );
     var default_msg = {{messages.count}}
     socket.onmessage = function(e) {

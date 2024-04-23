@@ -130,9 +130,9 @@
                 <div class="card p-4 text-white" style="height: auto;">
                     <p>نام گروه: {{group.name|default:'NOT NAME'}}</p>
                     <p class="text-mouted">
-                        username: <input type="text" disabled placeholder="http://127.0.0.1:8000/chat/u/{{target_user.username}}/">
+                        username: <input type="text" disabled placeholder="http://127.0.0.1:8000/chat/group/{{group.address}}/">
                         <button class="btn btn-warning"
-                            onclick="navigator.clipboard.writeText('http://127.0.0.1:8000/chat/u/{{target_user.username}}')">copy</button>
+                            onclick="navigator.clipboard.writeText('http://127.0.0.1:8000/chat/group/{{group.address}}')">copy</button>
                     </p>
                     <p>درباره گروه {{group.description|default:'چیزی درباره این گروه وجود ندارد'}}</p>
                     <p>تعداد اعضا: {{group.members.count}}</p>
@@ -222,8 +222,8 @@
         chat_body.scrollTop = chat_body.scrollHeight;
         
         var socket = new WebSocket(
-            // 'ws://' + window.location.host + '/ws/groupchat/?address={{group.address}}' // used when the project is run with the manage.py runserver.
-            'ws://{{IP_SERVER}}:8001/ws/groupchat/?address={{group.address}}'
+            'ws://' + window.location.host + '/ws/groupchat/?address={{group.address}}' // used when the project is run with the manage.py runserver.
+            // 'ws://{{IP_SERVER}}:8001/ws/groupchat/?address={{group.address}}'
         );
         var default_member_count = {{group.members.count}}
         var default_msg_count = {{messages.count}}
