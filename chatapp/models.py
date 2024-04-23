@@ -48,7 +48,8 @@ class GroupChat(models.Model):
             dict_ob.update({
                 user.username: {
                     'username': user.username,
-                    'id': user.get_profile_image(),
+                    'id': user.id,
+                    'image': user.get_profile_image(),
                 }
             })
         return dict_ob
