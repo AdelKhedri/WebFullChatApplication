@@ -1,0 +1,90 @@
+# 1-1 install ufw firewall:
+sudo apt-get install ufw
+
+# 1-2 allow ports 8001:daphne 5432:postgresql 6379:redis 80:nginx
+sudo ufw allow 8001
+sudo ufw allow 5432
+sudo ufw allow 6379
+sudo ufw allow http
+
+# 2 clone the project from github
+git clone git@github.com:AdelKhedri/WebFullChatApplication.git
+
+# 3 virtualenv
+# 3-1 install virtualenv
+sudo apt-get install virtualenv
+
+# 3-2 make virtualenv
+cd /home/{USER}/WebFullChatApplication/
+virtualenv env
+
+# 3-3 install requirements for psycopg2
+sudo apt-get install python3-dev libpq-dev
+
+# 3-4 install requirements
+pip install -r requirements.txt
+
+# 4 Create gunicorn service for working in the backgoroud
+# 4-1 Modify and copy the file gunicorn.socket from Deployment folder in the address /etc/systemd/system/
+sudo cp /home/{USER}/WebFullChatApplication/core/Deployment/nginx/gunicorn.socket /etc/systemd/system/
+
+# 4-2 Modify and copy the file gunicorn.service from Deployment folder in the address /etc/systemd/system/
+sudo cp /home/{USER}/WebFullChatApplication/core/Deployment/nginx/gunicorn.service /etc/systemd/system/
+
+# 4-3 start and enable gunicorn
+sudo systemctl start gunicorn.socket
+sudo systemctl enable gunicorn.socket
+
+# check for working socket. it will return contnt of index page:
+curl --unix-socket /run/gunicorn.sock localhost
+
+# if changed gunicorn.socket or gunicorn.service run this command:
+sudo systemctl daemon-reload
+
+# 5 install redis
+sudo apt-get install redis-server
+sudo systemctl restart redis-server
+
+# 6 Create daphne service for working in the backgoroud
+# 6-1 Modify and copy the file daphne from Deployment/nginx to /etc/systemd/system
+sudo cp /home/{USER}/WebFullChatApplication/core/Deployment/nginx/daphne.service /etc/systemd/system/
+
+# 6-2 start daphne service
+sudo systemctl start daphne
+
+# 7 install and configuraion postgresql:
+# 7-1 install postgresql:
+sudo apt-get install postgresql
+
+# 7-2 change authentication for user postgres in /etc/postgresql/14/main/pg_hba.conf.
+# change type authentication from peer to trust and restart postgresql
+
+# 7-3 create user on postgres
+CREATE USER chat_user CREATEDB PASSWORD 'chat_password'
+
+# 8 maigration and superuser
+# 8-1 makemigration
+cd /home/{USER}/WebFullChatApplication
+./manage.py makemigrations
+
+# 8-2 migrate
+./manage.py migrate
+
+# 8-3 create superuser
+./manage.py createsuperuser
+
+# 8 config nginx
+# install nginx
+sudo apt-get install nginx
+
+# 8-1 make or Modify projectsite file from Deployment folder in /etc/nginx/sites-available/{MYSITEPROJECT}
+
+# 8-2 enable the projectsite by linking it to the address /etc/nginx/sites-enabled
+sudo ln -s /etc/nginx/sites-available/projectsite /etc/nginx/sites-enabled
+
+# 8-3 test nginx configuraion for syntax errors:
+sudo nginx -t
+
+# 8-4 restart nginx
+sudo systemctl restart nginx
+
